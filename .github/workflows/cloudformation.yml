@@ -1,0 +1,49 @@
+name: Cloudformation
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: 6.0.x
+        
+    - name: Publish
+      run: dotnet publish --no-self-contained --runtime linux-x64 --configuration Release --output ./artifact/publish ./cloudformation-demo/src/cloudformation-demo/cloudformation-demo.csproj
+      
+    - name: Install zip
+      uses: montudor/action-zip@v1
+
+    - name: Zip output
+      run: zip -qq -r ../lambda.zip .
+      working-directory: artifact/publish
+      
+    - name: Copy Cloudformation Template
+      run: cp ./cloudformation-demo/deployment.yaml ./artifact/deployment.yaml
+      
+    - uses: actions/upload-artifact@v3
+      with:
+        name: lambda
+        path: ./artifact
+  
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ap-southeast-2
+    
+    - name: Upload to S3
+      run: aws s3 cp ./artifact/lambda.zip s3://youtube-demo-cloudformation-packages
+    
+   
