@@ -72,7 +72,7 @@ jobs:
           parameter-overrides: "Environment=-Test"
           
   
-  test-prod:
+  prod-deploy:
     runs-on: ubuntu-latest
     environment: Prod
     needs: build
@@ -93,7 +93,7 @@ jobs:
       - name: Deploy to AWS CloudFormation
         uses: aws-actions/aws-cloudformation-github-deploy@v1
         with:
-          name: youtube-cloudformation-demo
+          name: youtube-cloudformation-demo-prod
           template: artifact/deployment.yaml
           parameter-overrides: "Environment="
           
