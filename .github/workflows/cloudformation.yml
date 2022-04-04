@@ -70,6 +70,7 @@ jobs:
           name: youtube-cloudformation-demo
           template: artifact/deployment.yaml
           parameter-overrides: "Environment=-Test"
+          no-fail-on-empty-changeset: "1"
           
   
   prod-deploy:
@@ -96,6 +97,7 @@ jobs:
           name: youtube-cloudformation-demo-prod
           template: artifact/deployment.yaml
           parameter-overrides: "Environment="
+          no-fail-on-empty-changeset: "1"
           
     
   
