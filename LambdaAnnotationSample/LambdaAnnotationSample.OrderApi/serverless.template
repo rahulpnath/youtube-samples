@@ -1,0 +1,162 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Transform": "AWS::Serverless-2016-10-31",
+  "Description": "This template is partially managed by Amazon.Lambda.Annotations (v1.0.0.0).",
+  "Resources": {
+    "OrderTable": {
+      "Type": "AWS::DynamoDB::Table",
+      "Properties": {
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "OrderId",
+            "AttributeType": "S"
+          }
+        ],
+        "KeySchema": [
+          {
+            "AttributeName": "OrderId",
+            "KeyType": "HASH"
+          }
+        ],
+        "TableName": "Order",
+        "BillingMode": "PAY_PER_REQUEST"
+      }
+    },
+    "OrdersApiLambdaExecutionRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "ManagedPolicyArns": [
+          "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+        ],
+        "Policies": [
+          {
+            "PolicyName": "OrderApiDynamoDBAccessPolicy",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": "dynamodb:*",
+                  "Resource": {
+                    "Fn::GetAtt": [
+                      "OrderTable",
+                      "Arn"
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "LambdaAnnotationSampleOrderApiFunctionPostOrderGenerated": {
+      "Type": "AWS::Serverless::Function",
+      "Metadata": {
+        "Tool": "Amazon.Lambda.Annotations",
+        "SyncedEvents": [
+          "RootPost"
+        ]
+      },
+      "Properties": {
+        "Runtime": "dotnet6",
+        "CodeUri": ".",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Role": {
+          "Fn::GetAtt": [
+            "OrdersApiLambdaExecutionRole",
+            "Arn"
+          ]
+        },
+        "PackageType": "Zip",
+        "Handler": "LambdaAnnotationSample.OrderApi::LambdaAnnotationSample.OrderApi.Function_PostOrder_Generated::PostOrder",
+        "Events": {
+          "RootPost": {
+            "Type": "HttpApi",
+            "Properties": {
+              "Path": "/order",
+              "Method": "POST"
+            }
+          }
+        }
+      }
+    },
+    "LambdaAnnotationSampleOrderApiFunctionGetOrderGenerated": {
+      "Type": "AWS::Serverless::Function",
+      "Metadata": {
+        "Tool": "Amazon.Lambda.Annotations",
+        "SyncedEvents": [
+          "RootGet"
+        ]
+      },
+      "Properties": {
+        "Runtime": "dotnet6",
+        "CodeUri": ".",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Role": {
+          "Fn::GetAtt": [
+            "OrdersApiLambdaExecutionRole",
+            "Arn"
+          ]
+        },
+        "PackageType": "Zip",
+        "Handler": "LambdaAnnotationSample.OrderApi::LambdaAnnotationSample.OrderApi.Function_GetOrder_Generated::GetOrder",
+        "Events": {
+          "RootGet": {
+            "Type": "HttpApi",
+            "Properties": {
+              "Path": "/order/{orderId}",
+              "Method": "GET"
+            }
+          }
+        }
+      }
+    },
+    "LambdaAnnotationSampleOrderApiFunctionDeleteOrderGenerated": {
+      "Type": "AWS::Serverless::Function",
+      "Metadata": {
+        "Tool": "Amazon.Lambda.Annotations",
+        "SyncedEvents": [
+          "RootDelete"
+        ]
+      },
+      "Properties": {
+        "Runtime": "dotnet6",
+        "CodeUri": ".",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Role": {
+          "Fn::GetAtt": [
+            "OrdersApiLambdaExecutionRole",
+            "Arn"
+          ]
+        },
+        "PackageType": "Zip",
+        "Handler": "LambdaAnnotationSample.OrderApi::LambdaAnnotationSample.OrderApi.Function_DeleteOrder_Generated::DeleteOrder",
+        "Events": {
+          "RootDelete": {
+            "Type": "HttpApi",
+            "Properties": {
+              "Path": "/order/{orderId}",
+              "Method": "DELETE"
+            }
+          }
+        }
+      }
+    }
+  }
+}
