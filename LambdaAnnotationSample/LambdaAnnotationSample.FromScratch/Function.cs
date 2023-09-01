@@ -9,6 +9,12 @@ namespace LambdaAnnotationSample.FromScratch;
 
 public class Function
 {
+    private readonly IMyDependency _myDependencyCtor;
+
+    public Function(IMyDependency myDependencyCtor)
+    {
+        _myDependencyCtor = myDependencyCtor;
+    }
 
     /// <summary>
     /// 
@@ -19,8 +25,13 @@ public class Function
     /// <returns></returns>
     [LambdaFunction(Timeout = 100)]
     [HttpApi(LambdaHttpMethod.Get, "/add/{a}/{b}")]
-    public int MathPlus(int a, int b, ILambdaContext context)
+    public List<string> MathPlus(int a, int b, ILambdaContext context, [FromServices] IMyDependency myDependencyFunction)
     {
-        return a + b;
+        return new List<string>()
+        {
+            _myDependencyCtor.GetValue("Constructor"),
+            myDependencyFunction.GetValue("Function"),
+            (a + b).ToString()
+        };
     }
 }

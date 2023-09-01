@@ -16,5 +16,5 @@
     "function-handler"      : "LambdaAnnotationSample.FromScratch::LambdaAnnotationSample.FromScratch.Function::FunctionHandler",
     "s3-bucket"             : "cf-templates-u5max45jsk3a-ap-southeast-2",
     "template"              : "serverless.template",
-    "stack-name"            : "Maths"
+    "stack-name"            : "DependenyInjection"
 }
