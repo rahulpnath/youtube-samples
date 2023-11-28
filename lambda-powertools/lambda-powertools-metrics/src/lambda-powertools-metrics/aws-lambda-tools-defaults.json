@@ -14,5 +14,5 @@
     "template-parameters" : "",
     "docker-host-build-output-dir" : "./bin/Release/lambda-publish",
     "s3-bucket"                    : "cf-templates-u5max45jsk3a-ap-southeast-2",
-    "stack-name"                   : ""
+    "stack-name"                   : "weather-stats"
 }
