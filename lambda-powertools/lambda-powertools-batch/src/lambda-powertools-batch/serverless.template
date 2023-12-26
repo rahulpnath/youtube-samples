@@ -1,0 +1,118 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Transform": "AWS::Serverless-2016-10-31",
+  "Description": "An AWS Serverless Application. This template is partially managed by Amazon.Lambda.Annotations (v1.0.0.0).",
+  "Resources": {
+    "NotifyCustomers": {
+      "Type": "AWS::SQS::Queue",
+      "Properties": {
+        "QueueName": "notify-customers",
+        "VisibilityTimeout": 30,
+        "MessageRetentionPeriod": 86400,
+        "RedrivePolicy": {
+          "deadLetterTargetArn": {
+            "Fn::GetAtt": [
+              "NotifyCustomersDLQ",
+              "Arn"
+            ]
+          },
+          "maxReceiveCount": 2
+        }
+      }
+    },
+    "NotifyCustomersDLQ": {
+      "Type": "AWS::SQS::Queue",
+      "Properties": {
+        "QueueName": "notify-customers-dlq",
+        "VisibilityTimeout": 300,
+        "MessageRetentionPeriod": 86400
+      }
+    },
+    "NotifyCustomersLambdaExecutionRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "ManagedPolicyArns": [
+          "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+        ],
+        "Policies": [
+          {
+            "PolicyName": "NotifyCustomerServiceTestAccessPolicy",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "sqs:ChangeMessageVisibility",
+                    "sqs:ChangeMessageVisibilityBatch",
+                    "sqs:DeleteMessage",
+                    "sqs:DeleteMessageBatch",
+                    "sqs:GetQueueAttributes",
+                    "sqs:ReceiveMessage"
+                  ],
+                  "Resource": {
+                    "Fn::GetAtt": [
+                      "NotifyCustomers",
+                      "Arn"
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "MyQueueEventSourceMapping": {
+      "Type": "AWS::Lambda::EventSourceMapping",
+      "Properties": {
+        "BatchSize": 5,
+        "FunctionResponseTypes": [
+          "ReportBatchItemFailures"
+        ],
+        "EventSourceArn": {
+          "Fn::GetAtt": [
+            "NotifyCustomers",
+            "Arn"
+          ]
+        },
+        "FunctionName": {
+          "Ref": "lambdapowertoolsbatchFunctionsNotifyCustomersGenerated"
+        }
+      }
+    },
+    "lambdapowertoolsbatchFunctionsNotifyCustomersGenerated": {
+      "Type": "AWS::Serverless::Function",
+      "Metadata": {
+        "Tool": "Amazon.Lambda.Annotations"
+      },
+      "Properties": {
+        "Runtime": "dotnet6",
+        "CodeUri": ".",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Role": {
+          "Fn::GetAtt": [
+            "NotifyCustomersLambdaExecutionRole",
+            "Arn"
+          ]
+        },
+        "PackageType": "Zip",
+        "Handler": "lambda-powertools-batch::lambda_powertools_batch.Functions_NotifyCustomers_Generated::NotifyCustomers"
+      }
+    }
+  },
+  "Outputs": {}
+}

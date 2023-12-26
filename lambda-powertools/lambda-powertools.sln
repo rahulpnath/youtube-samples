@@ -11,7 +11,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "lambda-powertools-metrics",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "lambda-powertools-idempotency", "lambda-powertools-idempotency\src\lambda-powertools-idempotency\lambda-powertools-idempotency.csproj", "{D3943985-4482-4865-829B-977C01B76455}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "lambda-powertools-parameters", "lambda-powertools-parameters\src\lambda-powertools-parameters\lambda-powertools-parameters.csproj", "{61121C82-9C42-4780-AED5-315BE1CB7BCC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "lambda-powertools-parameters", "lambda-powertools-parameters\src\lambda-powertools-parameters\lambda-powertools-parameters.csproj", "{61121C82-9C42-4780-AED5-315BE1CB7BCC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "lambda-powertools-batch", "lambda-powertools-batch\src\lambda-powertools-batch\lambda-powertools-batch.csproj", "{B5470657-A139-4DEB-9E28-490C19AA5458}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{61121C82-9C42-4780-AED5-315BE1CB7BCC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{61121C82-9C42-4780-AED5-315BE1CB7BCC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{61121C82-9C42-4780-AED5-315BE1CB7BCC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B5470657-A139-4DEB-9E28-490C19AA5458}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B5470657-A139-4DEB-9E28-490C19AA5458}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B5470657-A139-4DEB-9E28-490C19AA5458}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B5470657-A139-4DEB-9E28-490C19AA5458}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
