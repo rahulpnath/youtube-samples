@@ -89,7 +89,7 @@
           ]
         },
         "FunctionName": {
-          "Ref": "lambdapowertoolsbatchFunctionsNotifyCustomersGenerated"
+          "Ref": "lambdapowertoolsbatchBatchFunctionNotifyCustomersGenerated"
         }
       }
     },
@@ -111,6 +111,26 @@
         },
         "PackageType": "Zip",
         "Handler": "lambda-powertools-batch::lambda_powertools_batch.Functions_NotifyCustomers_Generated::NotifyCustomers"
+      }
+    },
+    "lambdapowertoolsbatchBatchFunctionNotifyCustomersGenerated": {
+      "Type": "AWS::Serverless::Function",
+      "Metadata": {
+        "Tool": "Amazon.Lambda.Annotations"
+      },
+      "Properties": {
+        "Runtime": "dotnet6",
+        "CodeUri": ".",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Role": {
+          "Fn::GetAtt": [
+            "NotifyCustomersLambdaExecutionRole",
+            "Arn"
+          ]
+        },
+        "PackageType": "Zip",
+        "Handler": "lambda-powertools-batch::lambda_powertools_batch.BatchFunction_NotifyCustomers_Generated::NotifyCustomers"
       }
     }
   },
