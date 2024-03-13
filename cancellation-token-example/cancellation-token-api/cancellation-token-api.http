@@ -1,0 +1,6 @@
+@cancellation_token_api_HostAddress = http://localhost:5249
+
+GET {{cancellation_token_api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
