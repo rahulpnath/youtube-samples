@@ -1,5 +1,7 @@
 using Amazon.S3;
 using Amazon.S3.Model;
+using Amazon.SimpleNotificationService;
+using Amazon.SimpleNotificationService.Model;
 using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -29,7 +31,7 @@ app.MapGet("/long-running-request", async (CancellationToken cancellationToken) 
         {
             if (cancellationToken.IsCancellationRequested)
                 return Results.StatusCode(499);
-            
+
             await Task.Delay(1000);
             var result = $"{randomId} - Result {i}";
             Console.WriteLine(result);
@@ -55,6 +57,7 @@ app.MapPost("/upload-large-file", async ([FromForm] FileUploadRequest request, C
                 InputStream = request.File.OpenReadStream()
             }, cancellationToken);
 
+            await PerformAdditionalTasks(CancellationToken.None);
             return Results.NoContent();
         }
         catch (OperationCanceledException e)
@@ -66,8 +69,22 @@ app.MapPost("/upload-large-file", async ([FromForm] FileUploadRequest request, C
     .DisableAntiforgery()
     .WithOpenApi();
 
+async Task PerformAdditionalTasks(CancellationToken cancellationToken)
+{
+    await Task.Delay(1000, cancellationToken);
+    
+    var snsClient = new AmazonSimpleNotificationServiceClient();
+    await snsClient.PublishAsync(new PublishRequest()
+    {
+        TopicArn = "<SNS TOPIC ARN>",
+        Message = "UserUploadedFileEvent"
+    }, cancellationToken);
+}
+
 #endregion
 
 app.Run();
 
-record FileUploadRequest(IFormFile File) { }
+record FileUploadRequest(IFormFile File)
+{
+}
