@@ -1,0 +1,21 @@
+
+{
+    "region" : "ap-southeast-2",
+    "profile" : "default",
+    "configuration" : "Release",
+    "framework"     : "net8.0",
+    "function-name" : "http-files-test",
+    "function-description" : "kkk",
+    "package-type"         : "Zip",
+    "function-handler"     : "http-files-test",
+    "function-memory-size" : 256,
+    "function-role"        : "arn:aws:iam::189107071895:role/lambda_exec_http-files-test-0",
+    "function-timeout"     : 10,
+    "function-runtime"     : "dotnet8",
+    "function-architecture" : "x86_64",
+    "function-subnets"      : "",
+    "function-security-groups" : "",
+    "tracing-mode"             : "PassThrough",
+    "environment-variables"    : "",
+    "image-tag"                : ""
+}

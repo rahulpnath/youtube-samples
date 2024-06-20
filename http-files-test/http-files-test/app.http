@@ -1,0 +1,27 @@
+# For more info on HTTP files go to https://aka.ms/vs/httpfile
+@cityName = Brisbane
+
+GET {{baseUrl}}/weatherforecast/{{cityName}}
+Accept: application/json
+Authorization: Bearer {{ApiToken}}
+
+###
+GET {{baseUrl}}/weatherforecast/{{cityName}}/20-Jun-2024
+Accept: application/json
+
+###
+POST {{baseUrl}}/weatherforecast
+Accept: application/json
+Content-Type: application/json
+
+{
+  "cityName": "Brisbane",
+  "date": "21-Jun-2024",
+  "summary": "chilly",
+  "temperatureC": 5,
+  "temperatureF": 49
+}
+
+###
+DELETE {{baseUrl}}/weatherforecast/{{cityName}}/19-Jun-2024
+Accept: application/json
