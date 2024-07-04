@@ -1,0 +1,6 @@
+@stream_zip_files_HostAddress = http://localhost:5190
+
+GET {{stream_zip_files_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
