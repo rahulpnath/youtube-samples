@@ -23,9 +23,14 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 var bucketName = "myapp-data-files";
-app.MapGet("/get-file", async (string key, IAmazonS3 s3Client, HttpResponse response) =>
+app.MapGet("/get-file", async (string key, string? versionId, IAmazonS3 s3Client, HttpResponse response) =>
     {
-        var fileObject = await s3Client.GetObjectAsync(bucketName, key);
+        var fileObject = await s3Client.GetObjectAsync(new GetObjectRequest()
+        {
+            BucketName = bucketName,
+            Key = key,
+            VersionId = versionId
+        });
         response.ContentType = "application/octet-stream";
         response.Headers.Append($"Content-Disposition", $"attachment; filename={fileObject.Key}");
         var responseStream = response.BodyWriter.AsStream();
@@ -33,6 +38,20 @@ app.MapGet("/get-file", async (string key, IAmazonS3 s3Client, HttpResponse resp
 
     })
     .WithName("GetFile")
+    .WithOpenApi();
+
+app.MapGet("/get-file-versions", async (string key, IAmazonS3 s3Client, HttpResponse response) =>
+    {
+        var fileObject = await s3Client.ListVersionsAsync(new ListVersionsRequest()
+        {
+            BucketName = bucketName,
+            Prefix = key
+        });
+
+        return fileObject.Versions.Select(a => new {a.BucketName, a.Key, a.VersionId, a.IsLatest, a.IsDeleteMarker});
+
+    })
+    .WithName("GetFileVersions")
     .WithOpenApi();
 
 app.MapPost("/upload-file", async ([FromForm] FileUploadRequest request, IAmazonS3 s3Client) =>
@@ -51,9 +70,15 @@ app.MapPost("/upload-file", async ([FromForm] FileUploadRequest request, IAmazon
     .WithOpenApi();
 ;
 
-app.MapDelete("/delete-file", async (string fileName, IAmazonS3 s3Client) =>
+app.MapDelete("/delete-file", async (string fileName, string? versionId, IAmazonS3 s3Client) =>
     {
-        await s3Client.DeleteObjectAsync(bucketName, fileName);
+        await s3Client.DeleteObjectAsync(new DeleteObjectRequest()
+        {
+            BucketName = bucketName,
+            Key = fileName,
+            VersionId = versionId
+        });
+            
         return Results.NoContent();
     })
     .WithName("DeleteFile")
