@@ -9,7 +9,7 @@ const string bucketName = "user-ratings-for-my-app";
 
 var ratings = await GetAllRatings(client);
 
-var filteredRatings = ratings.Where(r => r.Rating == 3).Take(50).Select(r => r.Review);
+var filteredRatings = ratings.Select(r => r.Review);
 Console.WriteLine(string.Join(Environment.NewLine, filteredRatings));
 
 
@@ -17,28 +17,35 @@ return;
 
 async Task<List<ProductRating>> GetAllRatings(AmazonS3Client s3Client)
 {
-    var s3Objects = await GetAllFileS3Objects(s3Client);
-    var productRatings = new List<ProductRating>();
-    var fileReadCounter = 0;
-    foreach (var s3Object in s3Objects)
-    {
-        var rating = await GetRating(s3Client, s3Object);
-        productRatings.Add(rating);
-        Console.WriteLine("File {0} read {1}", s3Object.Key, ++fileReadCounter);
-    }
-
-    return productRatings;
+    var s3Objects = GetAllFileS3Objects(s3Client);
+    return await s3Objects.SelectAwait(async (s3Object, i) =>
+        {
+            var rating = await GetRating(s3Client, s3Object);
+            Console.WriteLine("File {0} read {1}", s3Object.Key, i);
+            return rating;
+        }).Where(rating => rating.Rating == 5)
+        .Take(20)
+        .ToListAsync();
 }
 
-async Task<IEnumerable<S3Object>> GetAllFileS3Objects(AmazonS3Client amazonS3Client)
+async IAsyncEnumerable<S3Object> GetAllFileS3Objects(AmazonS3Client amazonS3Client)
 {
-    var s3ObjectsResponse = await amazonS3Client.ListObjectsV2Async(new ListObjectsV2Request()
+    ListObjectsV2Response? s3ObjectsResponse = null;
+    do
     {
-        BucketName = bucketName,
-        MaxKeys = 10
-    });
+        s3ObjectsResponse = await amazonS3Client.ListObjectsV2Async(new ListObjectsV2Request()
+        {
+            BucketName = bucketName,
+            ContinuationToken = s3ObjectsResponse?.NextContinuationToken,
+            StartAfter = s3ObjectsResponse?.StartAfter
+        });
 
-    return s3ObjectsResponse.S3Objects;
+        Console.WriteLine("Total Objects retrieved {0}", s3ObjectsResponse.S3Objects.Count);
+        foreach (var s3Object in s3ObjectsResponse.S3Objects)
+        {
+            yield return s3Object;
+        }
+    } while (s3ObjectsResponse.IsTruncated);
 }
 
 async Task<ProductRating> GetRating(AmazonS3Client amazonS3Client, S3Object o)
