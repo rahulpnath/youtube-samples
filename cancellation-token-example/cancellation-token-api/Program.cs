@@ -10,8 +10,11 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddCors();
 
 var app = builder.Build();
+
+app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -58,7 +61,7 @@ app.MapPost("/upload-large-file", async ([FromForm] FileUploadRequest request, C
             }, cancellationToken);
 
             await PerformAdditionalTasks(CancellationToken.None);
-            return Results.NoContent();
+            return Results.Ok();
         }
         catch (OperationCanceledException e)
         {
@@ -72,13 +75,13 @@ app.MapPost("/upload-large-file", async ([FromForm] FileUploadRequest request, C
 async Task PerformAdditionalTasks(CancellationToken cancellationToken)
 {
     await Task.Delay(1000, cancellationToken);
-    
-    var snsClient = new AmazonSimpleNotificationServiceClient();
-    await snsClient.PublishAsync(new PublishRequest()
-    {
-        TopicArn = "<SNS TOPIC ARN>",
-        Message = "UserUploadedFileEvent"
-    }, cancellationToken);
+
+    // var snsClient = new AmazonSimpleNotificationServiceClient();
+    // await snsClient.PublishAsync(new PublishRequest()
+    // {
+    //     TopicArn = "<SNS TOPIC ARN>",
+    //     Message = "UserUploadedFileEvent"
+    // }, cancellationToken);
 }
 
 #endregion
