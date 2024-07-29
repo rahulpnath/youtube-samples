@@ -4,6 +4,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "cancellation-token-api", "c
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "cancellation-token-example", "cancellation-token-example\cancellation-token-example.csproj", "{FEE99713-6974-473D-B5F4-9FDBDDFFF4D6}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UI", "UI", "{33E8FC24-A8CD-4532-B8AD-308DA654F970}"
+	ProjectSection(SolutionItems) = preProject
+		upload-video-sample.html = upload-video-sample.html
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

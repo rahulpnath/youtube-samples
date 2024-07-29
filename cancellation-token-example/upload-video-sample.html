@@ -9,116 +9,120 @@
 </head>
 
 <body class="bg-gray-100">
-    <nav class="bg-blue-500 p-4">
-        <ul class="flex space-x-4 text-white">
-            <li><a href="#" class="hover:underline">Home</a></li>
-            <li><a href="#" class="hover:underline">About</a></li>
-            <li><a href="#" class="hover:underline">Contact</a></li>
-        </ul>
-    </nav>
+<nav class="bg-blue-500 p-4">
+    <ul class="flex space-x-4 text-white">
+        <li><a href="#" class="hover:underline">Home</a></li>
+        <li><a href="#" class="hover:underline">About</a></li>
+        <li><a href="#" class="hover:underline">Contact</a></li>
+    </ul>
+</nav>
 
-    <div class="container mx-auto mt-8 p-4">
-        <h1 class="text-3xl font-bold mb-4">Upload Video</h1>
+<div class="container mx-auto mt-8 p-4">
+    <h1 class="text-3xl font-bold mb-4">Upload Video</h1>
 
-        <form id="uploadForm" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
-            <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-bold mb-2" for="file">
-                    Choose a file to upload:
-                </label>
-                <input
+    <form id="uploadForm" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+        <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-bold mb-2" for="file">
+                Choose a file to upload:
+            </label>
+            <input
                     class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     id="file" type="file" required>
-            </div>
-            <div class="flex items-center justify-between">
-                <button id="uploadBtn"
+        </div>
+        <div class="flex items-center justify-between">
+            <button id="uploadBtn"
                     class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                     type="submit">
-                    Upload
-                </button>
-                <button id="cancelBtn"
+                Upload
+            </button>
+            <button id="cancelBtn"
                     class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                     type="button" disabled>
-                    Cancel
-                </button>
-            </div>
-        </form>
-
-        <div id="status" class="mt-4 text-lg font-semibold"></div>
-        <div id="progress" class="mt-2 w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700 hidden">
-            <div class="bg-blue-600 h-2.5 rounded-full" style="width: 0%"></div>
+                Cancel
+            </button>
         </div>
+    </form>
+
+    <div id="status" class="mt-4 text-lg font-semibold"></div>
+    <div id="progress" class="mt-2 w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700 hidden">
+        <div class="bg-blue-600 h-2.5 rounded-full" style="width: 0%"></div>
     </div>
+</div>
 
-    <script>
-        const form = document.getElementById('uploadForm');
-        const uploadBtn = document.getElementById('uploadBtn');
-        const cancelBtn = document.getElementById('cancelBtn');
-        const statusDiv = document.getElementById('status');
-        const progressBar = document.getElementById('progress');
-        const progressBarFill = progressBar.querySelector('div');
-        let abortController = null;
+<script>
+    const form = document.getElementById('uploadForm');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const statusDiv = document.getElementById('status');
+    const progressBar = document.getElementById('progress');
+    const progressBarFill = progressBar.querySelector('div');
+    let abortController = null;
 
-        function resetForm() {
-            form.reset();
-            uploadBtn.disabled = false;
-            cancelBtn.disabled = true;
-            statusDiv.textContent = '';
-            progressBar.classList.add('hidden');
-            progressBarFill.style.width = '0%';
-            uploadInProgress = false;
+    function resetForm() {
+        form.reset();
+        uploadBtn.disabled = false;
+        cancelBtn.disabled = true;
+        statusDiv.textContent = '';
+        progressBar.classList.add('hidden');
+        progressBarFill.style.width = '0%';
+        uploadInProgress = false;
+    }
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const file = document.getElementById('file').files[0];
+        if (!file) {
+            alert('Please select a file to upload');
+            return;
         }
 
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const file = document.getElementById('file').files[0];
-            if (!file) {
-                alert('Please select a file to upload');
-                return;
+        uploadBtn.disabled = true;
+        cancelBtn.disabled = false;
+        statusDiv.textContent = 'Uploading...';
+        progressBar.classList.remove('hidden');
+        progressBarFill.style.width = '0%';
+
+        const formData = new FormData();
+        formData.append('File', file);
+
+        abortController = new AbortController();
+        try {
+            uploadInProgress = true;
+            const response = await fetch('https://localhost:44367/upload-large-file', {
+                method: 'POST',
+                body: formData,
+                signal: abortController.signal
+            });
+
+            if (uploadInProgress == false) return;
+
+            if (response.ok) {
+                statusDiv.textContent = 'Upload completed successfully!';
+                progressBarFill.style.width = '100%';
+            } else {
+                statusDiv.textContent = 'Upload failed. Please try again.';
             }
-
-            uploadBtn.disabled = true;
-            cancelBtn.disabled = false;
-            statusDiv.textContent = 'Uploading...';
-            progressBar.classList.remove('hidden');
-            progressBarFill.style.width = '0%';
-
-            const formData = new FormData();
-            formData.append('File', file);
-
-            try {
-                const response = await fetch('http://localhost:5249/upload-large-file', {
-                    method: 'POST',
-                    body: formData,
-                });
-
-                if (uploadInProgress == false) return;
-
-                if (response.ok) {
-                    statusDiv.textContent = 'Upload completed successfully!';
-                    progressBarFill.style.width = '100%';
-                } else {
-                    statusDiv.textContent = 'Upload failed. Please try again.';
-                }
-            } catch (error) {
-                console.log('Error', error);
-                if (error.name === 'AbortError') {
-                    statusDiv.textContent = 'Upload cancelled.';
-                } else {
-                    statusDiv.textContent = 'An error occurred during upload.';
-                    console.error('Upload error:', error);
-                }
-            } finally {
-                uploadBtn.disabled = false;
-                cancelBtn.disabled = true;
-                abortController = null;
+        } catch (error) {
+            console.log('Error', error);
+            if (error.name === 'AbortError') {
+                statusDiv.textContent = 'Upload cancelled.';
+            } else {
+                statusDiv.textContent = 'An error occurred during upload.';
+                console.error('Upload error:', error);
             }
-        });
+        } finally {
+            uploadBtn.disabled = false;
+            cancelBtn.disabled = true;
+            abortController = null;
+        }
+    });
 
-        cancelBtn.addEventListener('click', () => {
-            resetForm();
-            statusDiv.textContent = 'Upload cancelled.';
-        });
-    </script>
+    cancelBtn.addEventListener('click', () => {
+        abortController.abort();
+        resetForm();
+        statusDiv.textContent = 'Upload cancelled.';
+    });
+</script>
 </body>
 
 </html>

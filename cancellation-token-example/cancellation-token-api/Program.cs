@@ -48,7 +48,9 @@ app.MapGet("/long-running-request", async (CancellationToken cancellationToken) 
 
 #region Large Upload
 
-app.MapPost("/upload-large-file", async ([FromForm] FileUploadRequest request, CancellationToken cancellationToken) =>
+app.MapPost("/upload-large-file", async (
+        [FromForm] FileUploadRequest request, 
+        CancellationToken cancellationToken) =>
     {
         try
         {
