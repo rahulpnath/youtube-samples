@@ -1,0 +1,6 @@
+@hello_rds_HostAddress = http://localhost:5222
+
+GET {{hello_rds_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
