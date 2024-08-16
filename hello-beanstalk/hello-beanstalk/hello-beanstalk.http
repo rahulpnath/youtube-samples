@@ -1,0 +1,6 @@
+@hello_beanstalk_HostAddress = http://localhost:5003
+
+GET {{hello_beanstalk_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
