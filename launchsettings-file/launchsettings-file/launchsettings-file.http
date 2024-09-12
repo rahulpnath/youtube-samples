@@ -1,0 +1,6 @@
+@launchsettings_file_HostAddress = http://localhost:5140
+
+GET {{launchsettings_file_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
