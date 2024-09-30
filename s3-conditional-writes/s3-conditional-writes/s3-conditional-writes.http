@@ -1,0 +1,6 @@
+@s3_conditional_writes_HostAddress = http://localhost:5266
+
+GET {{s3_conditional_writes_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
