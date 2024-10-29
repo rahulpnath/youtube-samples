@@ -1,0 +1,6 @@
+@aws_message_fwk_sqs_HostAddress = http://localhost:5062
+
+GET {{aws_message_fwk_sqs_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
