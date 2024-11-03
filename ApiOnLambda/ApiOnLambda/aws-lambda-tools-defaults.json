@@ -1,0 +1,21 @@
+
+{
+    "region" : "ap-southeast-2",
+    "profile" : "default",
+    "configuration" : "Release",
+    "framework"     : "net8.0",
+    "function-name" : "ApiOnLambda",
+    "function-description" : "",
+    "package-type"         : "Zip",
+    "function-handler"     : "ApiOnLambda",
+    "function-memory-size" : 256,
+    "function-role"        : "arn:aws:iam::189107071895:role/lambda_exec_api-on-lambda-vs-rest",
+    "function-timeout"     : 30,
+    "function-runtime"     : "dotnet8",
+    "function-architecture" : "x86_64",
+    "function-subnets"      : "",
+    "function-security-groups" : "",
+    "tracing-mode"             : "PassThrough",
+    "environment-variables"    : "\"ASPNETCORE_ENVIRONMENT\"=\"Development\"",
+    "image-tag"                : ""
+}
