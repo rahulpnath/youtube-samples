@@ -7,7 +7,7 @@ using WeatherForecast.Messages;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
+Console.WriteLine("Starting WeatherForecast.Api");
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -37,13 +37,14 @@ var localStackRegion = "ap-southeast-2";
 
 builder.Services.AddAWSService<IAmazonDynamoDB>();
 builder.Services.AddAWSService<IAmazonSQS>();
-
 builder.Services.AddSingleton<IDynamoDBContext, DynamoDBContext>();
+
+builder.Services.AddAWSLambdaHosting(LambdaEventSource.HttpApi);
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+// if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
@@ -54,6 +55,7 @@ app.UseHttpsRedirection();
 
 app.MapPost("/weatherforecast", async (WeatherForecastData data, IDynamoDBContext dynamoDbContext, IAmazonSQS publisher) =>
     {
+        Console.WriteLine($"Received WeatherForecast data for city {data.City}");
         await dynamoDbContext.SaveAsync(data);
         await publisher.SendMessageAsync(
             new SendMessageRequest(weatherDataQueue,
