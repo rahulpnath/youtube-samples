@@ -1,0 +1,44 @@
+name: Build and Deploy Lambda Functions
+
+on:
+  push:
+    branches:
+      - main # Adjust as needed
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      AWS_REGION: "us-east-1" # Update to your region
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: "8.0" # Use the .NET version for your Lambda functions
+
+      - name: Install AWS Lambda Tools
+        run: dotnet tool install -g Amazon.Lambda.Tools
+
+      - name: Install AWS CDK
+        run: npm install -g aws-cdk
+
+      - name: Package ServiceFunction Lambda
+        run: dotnet lambda package -pl ServiceFunction -o ./artifacts/service.zip
+
+      - name: Package ApiFunction Lambda
+        run: dotnet lambda package -pl ApiFunction -o ./artifacts/api.zip
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: $AWS_REGION
+
+      - name: CDK Deploy
+        run: cdk deploy --all --require-approval never
