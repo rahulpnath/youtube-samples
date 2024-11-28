@@ -39,6 +39,24 @@ app.MapGet("/get-file", async (
     .WithName("GetFile")
     .WithOpenApi();
 
+app.MapGet("/get-file-and-etag", async (
+        string fileName,
+        IAmazonS3 s3Client) =>
+    {
+        var file = await s3Client.GetObjectAsync(new GetObjectRequest()
+        {
+            BucketName = "user-service-large-messages",
+            Key = fileName,
+        });
+
+        using var reader = new StreamReader(file.ResponseStream);
+        var contents = await reader.ReadToEndAsync();
+        return new {file.Key, contents, file.ETag};
+       
+    })
+    .WithName("GetFileAngEtag")
+    .WithOpenApi();
+
 app.MapPost("/upload-file", async (
         [FromForm] FileUploadRequest request,
         IAmazonS3 s3Client,
@@ -49,7 +67,7 @@ app.MapPost("/upload-file", async (
             BucketName = "user-service-large-messages",
             Key = request.File.FileName,
             InputStream = request.File.OpenReadStream(),
-            IfNoneMatch = "*"
+            IfNoneMatch = "*",
         }, cancellationToken);
 
         return Results.Ok();
@@ -58,6 +76,26 @@ app.MapPost("/upload-file", async (
     .DisableAntiforgery()
     .WithOpenApi();
 
+
+app.MapPost("/upload-file-etag", async (
+        [FromForm] FileUploadRequest request,
+        string? etag,
+        IAmazonS3 s3Client,
+        CancellationToken cancellationToken) =>
+    {
+        await s3Client.PutObjectAsync(new PutObjectRequest()
+        {
+            BucketName = "user-service-large-messages",
+            Key = request.File.FileName,
+            InputStream = request.File.OpenReadStream(),
+            IfMatch = etag
+        }, cancellationToken);
+
+        return Results.Ok();
+    })
+    .WithName("UploadFileWithETag")
+    .DisableAntiforgery()
+    .WithOpenApi();
 
 app.Run();
 
