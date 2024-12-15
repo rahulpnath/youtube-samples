@@ -1,0 +1,6 @@
+@dynamodb_opensearch_HostAddress = http://localhost:5269
+
+GET {{dynamodb_opensearch_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
