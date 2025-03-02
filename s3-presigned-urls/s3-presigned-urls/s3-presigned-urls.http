@@ -1,0 +1,6 @@
+@s3_presigned_urls_HostAddress = http://localhost:5191
+
+GET {{s3_presigned_urls_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

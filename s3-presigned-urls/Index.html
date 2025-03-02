@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>S3 Presigned Upload</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            color: #333;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 400px;
+            text-align: center;
+        }
+        input, button {
+            width: 100%;
+            margin: 10px 0;
+            padding: 10px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>S3 Presigned Upload</h1>
+    <div class="container">
+        <input type="text" id="uploadUrl" placeholder="Enter Presigned URL" required>
+        <input type="file" id="fileInput">
+        <button onclick="uploadFile()">Upload</button>
+        <p id="status"></p>
+    </div>
+    
+    <script>
+        function uploadFile() {
+            const fileInput = document.getElementById("fileInput");
+            const uploadUrl = document.getElementById("uploadUrl").value;
+            const status = document.getElementById("status");
+
+            if (!fileInput.files.length) {
+                status.textContent = "Please select a file.";
+                return;
+            }
+            if (!uploadUrl) {
+                status.textContent = "Please enter a presigned URL.";
+                return;
+            }
+            
+            const file = fileInput.files[0];
+            
+            fetch(uploadUrl, {
+                method: "PUT",
+                body: file,
+                headers: {
+                    "Content-Type": file.type
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    status.textContent = "Upload successful!";
+                    status.style.color = "green";
+                } else {
+                    status.textContent = "Upload failed. Please check the URL and try again.";
+                    status.style.color = "red";
+                }
+            })
+            .catch(error => {
+                status.textContent = "Error: " + error.message;
+                status.style.color = "red";
+            });
+        }
+    </script>
+</body>
+</html>
