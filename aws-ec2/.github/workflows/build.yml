@@ -1,0 +1,60 @@
+name: Build and Deploy MyApi
+
+on:
+  push:
+    branches:
+      - main
+      - test
+
+env:
+  PROJECT_PATH: 'MyApi/MyApi.csproj'
+  DOTNET_VERSION: '8.0.x'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+    
+    - name: Publish
+      run: dotnet publish ${{ env.PROJECT_PATH }} --configuration Release --output ./publish --self-contained true -r linux-x64
+    
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+    
+    - name: Copy files to EC2
+      env:
+        EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+        EC2_HOST: ${{ secrets.EC2_HOST }}
+        EC2_USERNAME: ${{ secrets.EC2_USERNAME }}
+      run: |
+        echo "$EC2_SSH_KEY" > ssh_key.pem
+        chmod 600 ssh_key.pem
+        
+        # Create the app directory if it doesn't exist
+        ssh -o StrictHostKeyChecking=no -i ssh_key.pem $EC2_USERNAME@$EC2_HOST 'mkdir -p ~/myapi'
+        
+        # Copy the published files
+        scp -o StrictHostKeyChecking=no -i ssh_key.pem -r ./publish/* $EC2_USERNAME@$EC2_HOST:~/myapi/
+        
+        # Copy the service file
+        scp -o StrictHostKeyChecking=no -i ssh_key.pem ./MyApi/myapi.service $EC2_USERNAME@$EC2_HOST:~/myapi/
+        
+        # Setup and start the service
+        ssh -o StrictHostKeyChecking=no -i ssh_key.pem $EC2_USERNAME@$EC2_HOST '
+          sudo cp ~/myapi/myapi.service /etc/systemd/system/
+          sudo chmod +x ~/myapi/MyApi
+          sudo systemctl daemon-reload
+          sudo systemctl enable myapi
+          sudo systemctl restart myapi
+        '
