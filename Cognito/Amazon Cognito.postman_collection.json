@@ -1,0 +1,151 @@
+{
+	"info": {
+		"_postman_id": "5d1f74d3-9c6e-4ca7-9549-9d8b8f0707cd",
+		"name": "Amazon Cognito (OAuth2 Authorization Code Flow)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "2669294"
+	},
+	"item": [
+		{
+			"name": "OAuth Token",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "grant_type",
+							"value": "authorization_code",
+							"type": "text"
+						},
+						{
+							"key": "client_id",
+							"value": "CLIENT_ID",
+							"type": "text"
+						},
+						{
+							"key": "client_secret",
+							"value": "CLIENT_SECRET",
+							"type": "text"
+						},
+						{
+							"key": "code",
+							"value": "AUTHORIZATION CODE AFTER LOGIN REDIRECT",
+							"type": "text"
+						},
+						{
+							"key": "redirect_uri",
+							"value": "https://www.rahulpnath.com",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://ap-southeast-2hi7lsvzfh.auth.ap-southeast-2.amazoncognito.com/oauth2/token",
+					"protocol": "https",
+					"host": [
+						"ap-southeast-2hi7lsvzfh",
+						"auth",
+						"ap-southeast-2",
+						"amazoncognito",
+						"com"
+					],
+					"path": [
+						"oauth2",
+						"token"
+					],
+					"query": [
+						{
+							"key": "grant_type",
+							"value": null,
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Refresh Token",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "grant_type",
+							"value": "refresh_token",
+							"type": "text"
+						},
+						{
+							"key": "client_id",
+							"value": "CLIENT_ID",
+							"type": "text"
+						},
+						{
+							"key": "client_secret",
+							"value": "CLIENT_SECRET",
+							"type": "text"
+						},
+						{
+							"key": "refresh_token",
+							"value": "REFRESH TOKEN",
+							"type": "text"
+						},
+						{
+							"key": "redirect_uri",
+							"value": "https://www.rahulpnath.com",
+							"type": "text",
+							"disabled": true
+						}
+					]
+				},
+				"url": {
+					"raw": "https://ap-southeast-2hi7lsvzfh.auth.ap-southeast-2.amazoncognito.com/oauth2/token",
+					"protocol": "https",
+					"host": [
+						"ap-southeast-2hi7lsvzfh",
+						"auth",
+						"ap-southeast-2",
+						"amazoncognito",
+						"com"
+					],
+					"path": [
+						"oauth2",
+						"token"
+					],
+					"query": [
+						{
+							"key": "grant_type",
+							"value": null,
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

@@ -1,6 +1,8 @@
 @CognitoApiSample_HostAddress = http://localhost:5264
+@Token = ACCESS_TOKEN
 
 GET {{CognitoApiSample_HostAddress}}/weatherforecast/
 Accept: application/json
+Authorization: Bearer {{Token}}
 
 ###

@@ -4,9 +4,11 @@
         <TargetFramework>net9.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
+        <UserSecretsId>6d35a5d2-a886-4bc4-a954-85bf42b8d283</UserSecretsId>
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.7" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.3"/>
     </ItemGroup>
 
