@@ -6,3 +6,16 @@ Accept: application/json
 Authorization: Bearer {{Token}}
 
 ###
+
+POST {{CognitoApiSample_HostAddress}}/weatherforecast
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer {{Token}}
+
+{
+  "date": "2025-08-01",
+  "temperatureC": 25,
+  "summary": "Warm"
+}
+
+###
