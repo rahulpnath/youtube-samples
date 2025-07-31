@@ -1,8 +1,14 @@
+using Amazon.DynamoDBv2;
+using Amazon.DynamoDBv2.DataModel;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+
+builder.Services.AddSingleton<IAmazonDynamoDB, AmazonDynamoDBClient>();
+builder.Services.AddSingleton<IDynamoDBContext, DynamoDBContext>();
 
 var app = builder.Build();
 
@@ -14,28 +20,25 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
 
-app.MapGet("/weatherforecast", () =>
+app.MapGet("/movie", async (int year, IDynamoDBContext context) 
+        =>
     {
-        var forecast = Enumerable.Range(1, 5).Select(index =>
-                new WeatherForecast
-                (
-                    DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-                    Random.Shared.Next(-20, 55),
-                    summaries[Random.Shared.Next(summaries.Length)]
-                ))
-            .ToArray();
-        return forecast;
+        var movies = await context.QueryAsync<Movie>(year).GetRemainingAsync();
+        return movies.Select(a => a.Title);
     })
     .WithName("GetWeatherForecast");
 
 app.Run();
 
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
+public class Movie
 {
-    public int TemperatureF => 32 + (int) (TemperatureC / 0.5556);
+    public int Year { get; set; }
+    public string Title { get; set; }
+    public List<string> Cast { get; set; }
+    public string Description { get; set; }
+    public List<string> Genre { get; set; }
+    public bool IsAvailableForStreaming { get; set; }
+    public List<string> Languages { get; set; }
+    public double Rating { get; set; }
 }
