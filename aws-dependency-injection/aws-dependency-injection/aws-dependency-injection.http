@@ -1,6 +1,20 @@
-@aws_dependency_injection_HostAddress = http://localhost:5233
+@baseUrl = http://localhost:5233
+### GET movies by year
+GET {{baseUrl}}/movie?year=2019
 
-GET {{aws_dependency_injection_HostAddress}}/weatherforecast/
-Accept: application/json
+### Create a new movie
+POST {{baseUrl}}/movie
+Content-Type: application/json
 
-###
+{
+  "year": 2025,
+  "title": "Mufasa",
+  "cast": ["Aaron Pierre", "Kelvin Harrison Jr."],
+  "description": "The origin story of Mufasa, exploring his rise to become king of the Pride Lands.",
+  "genre": ["Adventure", "Drama"],
+  "isAvailableForStreaming": true,
+  "languages": ["English"],
+  "rating": 8.7
+}
+
+
