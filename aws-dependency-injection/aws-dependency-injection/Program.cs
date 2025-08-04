@@ -54,7 +54,7 @@ app.MapGet("/movie", async (int year, IDynamoDBContext context)
         var movies = await context.QueryAsync<Movie>(year).GetRemainingAsync();
         return movies.Select(a => a.Title);
     })
-    .WithName("GetWeatherForecast");
+    .WithName("GetMoviesByYear");
 
 app.MapPost("/movie", async (Movie movie, IDynamoDBContext dbContext, IAmazonS3 s3Client) =>
 {
@@ -73,7 +73,8 @@ app.MapPost("/movie", async (Movie movie, IDynamoDBContext dbContext, IAmazonS3 
     await s3Client.PutObjectAsync(putRequest);
 
     return Results.Created($"/movie?year={movie.Year}", movie);
-});
+})
+.WithName("CreateMovie");
 
 app.Run();
 
