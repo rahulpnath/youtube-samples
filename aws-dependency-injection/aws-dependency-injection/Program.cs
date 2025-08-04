@@ -12,8 +12,10 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
+// builder.Services.AddDefaultAWSOptions();
+
 // DynamoDB – Direct interface-to-class registration
-builder.Services.AddSingleton<IAmazonDynamoDB, AmazonDynamoDBClient>();
+builder.Services.AddAWSService<IAmazonDynamoDB>();
 builder.Services.AddSingleton<IDynamoDBContext, DynamoDBContext>();
 
 // S3 – Explicit region
@@ -21,21 +23,10 @@ builder.Services.AddSingleton<IAmazonS3>(sp =>
     new AmazonS3Client(RegionEndpoint.APSouth1));
 
 // SQS – Explicit credentials
-builder.Services.AddSingleton<IAmazonSQS>(sp =>
-{
-    var creds = new BasicAWSCredentials("ACCESS_KEY", "SECRET_KEY");
-    return new AmazonSQSClient();
-});
+builder.Services.AddAWSService<IAmazonSQS>();
 
 // SNS – From configuration
-builder.Services.AddSingleton<IAmazonSimpleNotificationService>(sp =>
-{
-    var config = sp.GetRequiredService<IConfiguration>();
-    var key = config["AWS:AccessKey"];
-    var secret = config["AWS:SecretKey"];
-    var region = RegionEndpoint.GetBySystemName(config["AWS:Region"]);
-    return new AmazonSimpleNotificationServiceClient(key, secret, region);
-});
+builder.Services.AddAWSService<IAmazonSimpleNotificationService>();
 
 var app = builder.Build();
 
