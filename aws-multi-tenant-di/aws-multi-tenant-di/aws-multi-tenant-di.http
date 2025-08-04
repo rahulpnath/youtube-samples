@@ -1,0 +1,6 @@
+@aws_multi_tenant_di_HostAddress = http://localhost:5205
+
+GET {{aws_multi_tenant_di_HostAddress}}/movie/?year=2019
+Accept: application/json
+
+###
