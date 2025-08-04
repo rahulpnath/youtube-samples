@@ -2,5 +2,10 @@
 
 GET {{aws_multi_tenant_di_HostAddress}}/movie/?year=2019
 Accept: application/json
+regionEndpoint: ap-southeast-2
 
 ###
+
+GET {{aws_multi_tenant_di_HostAddress}}/movie/by-header-region/?year=2019
+Accept: application/json
+regionEndpoint: ap-south-1
