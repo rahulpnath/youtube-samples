@@ -11,9 +11,11 @@ builder.Services.AddAuthorization(configure =>
     configure.AddPolicy("AdminOnly", policy =>
     {
         policy.RequireAuthenticatedUser();
-        policy.RequireClaim("cognito:groups", "Admin");
+        // policy.RequireClaim("cognito:groups", "Admin");
+        policy.Requirements.Add(new AdminOnlyRequirement());
     });
 });
+builder.Services.AddSingleton<IAuthorizationHandler, AdminOnlyRequirementHandler>();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options => { builder.Configuration.GetSection("JwtBearer").Bind(options); });
 
@@ -65,6 +67,23 @@ app.MapPost(
 
 app.Run();
 
+
+public class AdminOnlyRequirement : IAuthorizationRequirement
+{
+}
+
+public class AdminOnlyRequirementHandler : AuthorizationHandler<AdminOnlyRequirement>
+{
+    protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, AdminOnlyRequirement requirement)
+    {
+        if (context.User.HasClaim(c => c.Type == "cognito:groups" && c.Value == "Admin"))
+        {
+            context.Succeed(requirement);
+        }
+
+        return Task.CompletedTask;
+    }
+}
 record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
 {
     public int TemperatureF => 32 + (int) (TemperatureC / 0.5556);
