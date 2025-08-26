@@ -1,3 +1,4 @@
+using CognitoApiSample;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 
@@ -14,8 +15,16 @@ builder.Services.AddAuthorization(configure =>
         // policy.RequireClaim("cognito:groups", "Admin");
         policy.Requirements.Add(new AdminOnlyRequirement());
     });
+    
+    configure.AddPolicy("Over40Only", policy =>
+    {
+        policy.RequireAuthenticatedUser();
+        policy.Requirements.Add(new AgeRequirement(40));
+    });
 });
 builder.Services.AddSingleton<IAuthorizationHandler, AdminOnlyRequirementHandler>();
+builder.Services.AddTransient<IAuthorizationHandler, AgeRequirementHandler>();
+builder.Services.AddHttpClient();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options => { builder.Configuration.GetSection("JwtBearer").Bind(options); });
 
@@ -55,7 +64,7 @@ app.MapGet("/weatherforecast", () =>
 app.MapPost(
         "/weatherforecast", 
         // [Authorize(Roles = "AdminOnly")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = "Over40Only")]
         (WeatherForecast forecast, ILoggerFactory loggerFactory) =>
     {
         var logger = loggerFactory.CreateLogger("WeatherForecastLogger");
