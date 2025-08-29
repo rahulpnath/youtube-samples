@@ -15,11 +15,11 @@ builder.Services.AddAuthorization(configure =>
         // policy.RequireClaim("cognito:groups", "Admin");
         policy.Requirements.Add(new AdminOnlyRequirement());
     });
-    
-    configure.AddPolicy("Over40Only", policy =>
+
+    configure.AddPolicy("Over18Only", policy =>
     {
         policy.RequireAuthenticatedUser();
-        policy.Requirements.Add(new AgeRequirement(40));
+        policy.Requirements.Add(new AgeRequirement(18));
     });
 });
 builder.Services.AddSingleton<IAuthorizationHandler, AdminOnlyRequirementHandler>();
@@ -62,10 +62,10 @@ app.MapGet("/weatherforecast", () =>
     .RequireAuthorization();
 
 app.MapPost(
-        "/weatherforecast", 
+        "/weatherforecast",
         // [Authorize(Roles = "AdminOnly")]
-        [Authorize(Policy = "Over40Only")]
-        (WeatherForecast forecast, ILoggerFactory loggerFactory) =>
+        [Authorize(Policy = "Over18Only")]
+(WeatherForecast forecast, ILoggerFactory loggerFactory) =>
     {
         var logger = loggerFactory.CreateLogger("WeatherForecastLogger");
         logger.LogInformation($"Received weather forecast: {forecast}");
@@ -95,5 +95,5 @@ public class AdminOnlyRequirementHandler : AuthorizationHandler<AdminOnlyRequire
 }
 record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
 {
-    public int TemperatureF => 32 + (int) (TemperatureC / 0.5556);
+    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
 }

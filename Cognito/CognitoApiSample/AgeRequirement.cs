@@ -1,10 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace CognitoApiSample;
 
-public class AgeRequirement(int minimumAge): IAuthorizationRequirement
+public class AgeRequirement(int minimumAge) : IAuthorizationRequirement
 {
-  public int MinimumAge {get;} = minimumAge;
+    public int MinimumAge { get; } = minimumAge;
 }
 
 public class AgeRequirementHandler : AuthorizationHandler<AgeRequirement>
@@ -26,11 +27,14 @@ public class AgeRequirementHandler : AuthorizationHandler<AgeRequirement>
         if (httpContext == null)
             return;
 
-        var birthdate = await GetUserBirthdateAsync(httpContext);
-        if (birthdate == null)
+
+        var birthdayClaim = context.User.FindFirst(ClaimTypes.DateOfBirth)?.Value;
+
+        //var birthdate = await GetUserBirthdateAsync(httpContext);
+        if (!DateTime.TryParse(birthdayClaim, out var birthdate))
             return;
 
-        var age = CalculateAge(birthdate.Value, DateTime.UtcNow.Date);
+        var age = CalculateAge(birthdate, DateTime.UtcNow.Date);
         if (age >= requirement.MinimumAge)
         {
             context.Succeed(requirement);
