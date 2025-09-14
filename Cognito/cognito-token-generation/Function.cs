@@ -26,6 +26,13 @@ public class Function
                 ((JsonObject)accessTokenGen["claimsToAddOrOverride"])["birthdate"] = birthdate;
                 context.Logger.LogLine($"Added birthdate claim: {birthdate}");
             }
+
+            var subscription = evnt["request"]?["userAttributes"]?["custom:subscription"]?.ToString();
+            if (!string.IsNullOrEmpty(subscription))
+            {
+                ((JsonObject)accessTokenGen["claimsToAddOrOverride"])["subscription"] = subscription;
+                context.Logger.LogLine($"Added subscription claim: {subscription}");
+            }
         }
         catch (Exception ex)
         {
