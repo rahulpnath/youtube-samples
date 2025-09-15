@@ -19,7 +19,8 @@ builder.Services.AddAuthorization(configure =>
     configure.AddPolicy("CanAccessDetailedWeatherData", policy =>
     {
         policy.AddRequirements(
-            new SubscriptionTierRequirement()
+            new SubscriptionTierRequirement(),
+            new GeographicAccessRequirement()
         );
     });
 
@@ -31,6 +32,8 @@ builder.Services.AddAuthorization(configure =>
 });
 
 builder.Services.AddSingleton<IAuthorizationHandler, PaidSubscriptionHandler>();
+builder.Services.AddSingleton<IAuthorizationHandler, EducationalInstitutionHandler>();
+builder.Services.AddSingleton<IAuthorizationHandler, SuspendedUserHandler>();
 
 builder.Services.AddSingleton<IAuthorizationHandler, AdminOnlyRequirementHandler>();
 builder.Services.AddTransient<IAuthorizationHandler, AgeRequirementHandler>();
