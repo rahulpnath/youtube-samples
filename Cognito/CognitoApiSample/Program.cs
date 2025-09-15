@@ -16,12 +16,22 @@ builder.Services.AddAuthorization(configure =>
         policy.Requirements.Add(new AdminOnlyRequirement());
     });
 
+    configure.AddPolicy("CanAccessDetailedWeatherData", policy =>
+    {
+        policy.AddRequirements(
+            new SubscriptionTierRequirement()
+        );
+    });
+
     configure.AddPolicy("Over18Only", policy =>
     {
         policy.RequireAuthenticatedUser();
         policy.Requirements.Add(new AgeRequirement(18));
     });
 });
+
+builder.Services.AddSingleton<IAuthorizationHandler, PaidSubscriptionHandler>();
+
 builder.Services.AddSingleton<IAuthorizationHandler, AdminOnlyRequirementHandler>();
 builder.Services.AddTransient<IAuthorizationHandler, AgeRequirementHandler>();
 builder.Services.AddHttpClient();
@@ -64,14 +74,32 @@ app.MapGet("/weatherforecast", () =>
 app.MapPost(
         "/weatherforecast",
         // [Authorize(Roles = "AdminOnly")]
-        [Authorize(Policy = "Over18Only")]
-(WeatherForecast forecast, ILoggerFactory loggerFactory) =>
-    {
-        var logger = loggerFactory.CreateLogger("WeatherForecastLogger");
-        logger.LogInformation($"Received weather forecast: {forecast}");
-        return Results.Ok();
-    })
+        [Authorize(Policy = "Over18Only")](WeatherForecast forecast, ILoggerFactory loggerFactory) =>
+        {
+            var logger = loggerFactory.CreateLogger("WeatherForecastLogger");
+            logger.LogInformation($"Received weather forecast: {forecast}");
+            return Results.Ok();
+        })
     .WithName("PostWeatherForecast")
+    .RequireAuthorization();
+
+app.MapGet("/weatherforecast/detailed",
+        [Authorize(Policy = "CanAccessDetailedWeatherData")]
+        () =>
+        {
+            var detailedForecast = Enumerable.Range(1, 5).Select(index =>
+                new DetailedWeatherForecast(
+                    DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
+                    Random.Shared.Next(-20, 55),
+                    summaries[Random.Shared.Next(summaries.Length)],
+                    Random.Shared.Next(20, 100), // Humidity
+                    Random.Shared.Next(0, 40), // WindSpeed
+                    Random.Shared.Next(0, 20) // Precipitation
+                )
+            ).ToArray();
+            return detailedForecast;
+        })
+    .WithName("GetDetailedWeatherForecast")
     .RequireAuthorization();
 
 app.Run();
@@ -93,7 +121,13 @@ public class AdminOnlyRequirementHandler : AuthorizationHandler<AdminOnlyRequire
         return Task.CompletedTask;
     }
 }
+
 record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
 {
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+    public int TemperatureF => 32 + (int) (TemperatureC / 0.5556);
+}
+
+record DetailedWeatherForecast(DateOnly Date, int TemperatureC, string? Summary, int Humidity, int WindSpeed, int Precipitation)
+{
+    public int TemperatureF => 32 + (int) (TemperatureC / 0.5556);
 }

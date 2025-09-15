@@ -7,6 +7,12 @@ Authorization: Bearer {{Token}}
 
 ###
 
+GET {{CognitoApiSample_HostAddress}}/weatherforecast/detailed
+Accept: application/json
+Authorization: Bearer {{Token}}
+
+###
+
 POST {{CognitoApiSample_HostAddress}}/weatherforecast
 Content-Type: application/json
 Accept: application/json

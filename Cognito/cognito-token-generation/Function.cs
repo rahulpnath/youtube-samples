@@ -33,6 +33,13 @@ public class Function
                 ((JsonObject)accessTokenGen["claimsToAddOrOverride"])["subscription"] = subscription;
                 context.Logger.LogLine($"Added subscription claim: {subscription}");
             }
+
+            var locale = evnt["request"]?["userAttributes"]?["locale"]?.ToString();
+            if (!string.IsNullOrEmpty(locale))
+            {
+                ((JsonObject)accessTokenGen["claimsToAddOrOverride"])["locale"] = locale;
+                context.Logger.LogLine($"Added locale claim: {locale}");
+            }
         }
         catch (Exception ex)
         {
