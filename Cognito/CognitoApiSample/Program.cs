@@ -35,6 +35,8 @@ builder.Services.AddSingleton<IAuthorizationHandler, PaidSubscriptionHandler>();
 builder.Services.AddSingleton<IAuthorizationHandler, EducationalInstitutionHandler>();
 builder.Services.AddSingleton<IAuthorizationHandler, SuspendedUserHandler>();
 
+builder.Services.AddSingleton<IAuthorizationHandler, AdminHandler>();
+
 builder.Services.AddSingleton<IAuthorizationHandler, AdminOnlyRequirementHandler>();
 builder.Services.AddTransient<IAuthorizationHandler, AgeRequirementHandler>();
 builder.Services.AddHttpClient();
