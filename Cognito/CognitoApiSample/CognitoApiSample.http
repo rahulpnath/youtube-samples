@@ -24,4 +24,12 @@ Authorization: Bearer {{Token}}
   "summary": "Warm"
 }
 
+### 
+
+POST {{CognitoApiSample_HostAddress}}/user/subscribe
+Accept: application/json
+Authorization: Bearer {{Token}}
+
+
+
 ###

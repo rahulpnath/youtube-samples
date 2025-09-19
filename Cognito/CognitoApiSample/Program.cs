@@ -1,3 +1,5 @@
+using Amazon.CognitoIdentityProvider;
+using Amazon.CognitoIdentityProvider.Model;
 using CognitoApiSample;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -30,11 +32,11 @@ builder.Services.AddAuthorization(configure =>
         policy.Requirements.Add(new AgeRequirement(18));
     });
 });
-
+builder.Services.AddAWSService<IAmazonCognitoIdentityProvider>();
 builder.Services.AddSingleton<IAuthorizationHandler, PaidSubscriptionHandler>();
 builder.Services.AddSingleton<IAuthorizationHandler, EducationalInstitutionHandler>();
 builder.Services.AddSingleton<IAuthorizationHandler, SuspendedUserHandler>();
-
+builder.Services.AddAWSService<IAmazonCognitoIdentityProvider>();
 builder.Services.AddSingleton<IAuthorizationHandler, AdminHandler>();
 
 builder.Services.AddSingleton<IAuthorizationHandler, AdminOnlyRequirementHandler>();
@@ -74,6 +76,42 @@ app.MapGet("/weatherforecast", () =>
         return forecast;
     })
     .WithName("GetWeatherForecast")
+    .RequireAuthorization();
+
+app.MapPost("/user/subscribe", async (IAmazonCognitoIdentityProvider congnitoIdentityProvider, HttpContext httpContext) =>
+    {
+        var userName = httpContext.User.Claims.FirstOrDefault(c => c.Type == "username")?.Value;
+        var attributeUpdateRequest = new AdminUpdateUserAttributesRequest()
+        {
+            UserPoolId = "ap-southeast-2_TTjHrnktq",
+            Username = userName,
+            UserAttributes = new List<AttributeType>()
+            {
+                new AttributeType()
+                {
+                    Name = "custom:subscription",
+                    Value = "Premium"
+                },
+                new AttributeType()
+                {
+                    Name = "locale",
+                    Value = "en-AU"
+                }
+            }
+        };
+        
+        await congnitoIdentityProvider.AdminUpdateUserAttributesAsync(attributeUpdateRequest);
+        
+        var addUserToGroupRequest = new AdminAddUserToGroupRequest()
+        {
+            UserPoolId = "ap-southeast-2_TTjHrnktq",
+            Username = userName,
+            GroupName = "PremiumUsers"
+        };
+        await congnitoIdentityProvider.AdminAddUserToGroupAsync(addUserToGroupRequest);
+
+    })
+    .WithName("UserSubscribe")
     .RequireAuthorization();
 
 app.MapPost(
