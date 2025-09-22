@@ -1,0 +1,20 @@
+@sqs_fifo_HostAddress = http://localhost:5298
+
+GET {{sqs_fifo_HostAddress}}/weatherforecast?city=Brisbane
+Accept: application/json
+
+###
+
+POST {{sqs_fifo_HostAddress}}/weatherforecast/
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "db3221b0-5c88-4310-8652-2814a741aea1",
+  "city": "Brisbane",
+  "date": "2025-09-24",
+  "temperatureC": 25,
+  "summary": "Warm"
+}
+
+###
