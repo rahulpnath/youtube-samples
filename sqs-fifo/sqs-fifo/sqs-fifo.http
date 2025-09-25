@@ -10,11 +10,13 @@ Accept: application/json
 Content-Type: application/json
 
 {
-  "id": "db3221b0-5c88-4310-8652-2814a741aea1",
+  "id": "b3b1a1e2-8c2e-4e2a-9c2e-1e2a9c2e1e3b",
   "city": "Brisbane",
-  "date": "2025-09-24",
-  "temperatureC": 25,
-  "summary": "Warm"
+  "details": {
+    "date": "2025-09-24",
+    "temperatureC": 16,
+    "summary": "Warm"
+  }
 }
 
 ###
