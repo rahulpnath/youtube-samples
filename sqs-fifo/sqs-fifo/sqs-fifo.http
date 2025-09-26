@@ -20,3 +20,11 @@ Content-Type: application/json
 }
 
 ###
+
+POST {{sqs_fifo_HostAddress}}/publish-batch-standard/
+Accept: application/json
+
+###
+
+POST {{sqs_fifo_HostAddress}}/publish-batch-fifo/
+Accept: application/json

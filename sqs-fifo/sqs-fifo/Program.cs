@@ -1,9 +1,7 @@
 using Amazon.SQS;
 using Amazon.SQS.Model;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using Microsoft.Extensions.Options;
-using sqs_fifo;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,7 +13,6 @@ builder.Services.AddOpenApi();
 builder.Services.Configure<SqsSettings>(builder.Configuration.GetSection("SqsSettings"));
 
 builder.Services.AddAWSService<IAmazonSQS>();
-// builder.Services.AddHostedService<WeatherForecastProcessor>();
 
 var app = builder.Build();
 
@@ -56,18 +53,75 @@ app.MapPost("/weatherforecast", async (WeatherForecast data, IAmazonSQS sqsClien
         MessageGroupId = data.City,
         MessageDeduplicationId = data.Id == Guid.Empty ? null : data.Id.ToString(),
         MessageBody = JsonSerializer.Serialize(data.Details),
-        QueueUrl = sqsOptions.Value.QueueUrl
+        QueueUrl = sqsOptions.Value.FifoQueueUrl
     };
 
     var result = await sqsClient.SendMessageAsync(request);
 })
 .WithName("PostWeatherForecast");
 
+app.MapPost("/publish-batch-standard", async (IAmazonSQS sqsClient, IOptions<SqsSettings> sqsOptions) =>
+{
+    var standardEntries = new List<SendMessageBatchRequestEntry>();
+    for (int i = 1; i <= 10; i++)
+    {
+        standardEntries.Add(new SendMessageBatchRequestEntry
+        {
+            Id = $"standard-{i}",
+            MessageBody = JsonSerializer.Serialize(new {
+                LoopNumber = i,
+                Message = $"Standard queue message #{i}",
+                Timestamp = DateTime.UtcNow
+            })
+        });
+    }
+    var standardBatchResult = await sqsClient.SendMessageBatchAsync(new SendMessageBatchRequest
+    {
+        QueueUrl = sqsOptions.Value.StandardQueueUrl,
+        Entries = standardEntries
+    });
+    return Results.Ok(new {
+        Message = "Successfully sent 10 messages to the standard queue using batch operation",
+        BatchResults = standardBatchResult.Successful.Select(x => new { x.MessageId }).ToList()
+    });
+})
+.WithName("PublishBatchStandardMessages");
+
+app.MapPost("/publish-batch-fifo", async (IAmazonSQS sqsClient, IOptions<SqsSettings> sqsOptions) =>
+{
+    var fifoEntries = new List<SendMessageBatchRequestEntry>();
+    for (int i = 1; i <= 10; i++)
+    {
+        fifoEntries.Add(new SendMessageBatchRequestEntry
+        {
+            Id = $"fifo-{i}",
+            MessageGroupId = $"message-group-id",
+            MessageDeduplicationId = Guid.NewGuid().ToString(),
+            MessageBody = JsonSerializer.Serialize(new {
+                LoopNumber = i,
+                Message = $"FIFO queue message #{i}",
+                Timestamp = DateTime.UtcNow
+            })
+        });
+    }
+    var fifoBatchResult = await sqsClient.SendMessageBatchAsync(new SendMessageBatchRequest
+    {
+        QueueUrl = sqsOptions.Value.FifoQueueUrl,
+        Entries = fifoEntries
+    });
+    return Results.Ok(new {
+        Message = "Successfully sent 10 messages to the FIFO queue using batch operation",
+        BatchResults = fifoBatchResult.Successful.Select(x => new { x.MessageId }).ToList()
+    });
+})
+.WithName("PublishBatchFifoMessages");
+
 app.Run();
 
 public class SqsSettings
 {
-    public string QueueUrl { get; set; } = string.Empty;
+    public string StandardQueueUrl { get; set; } = string.Empty;
+    public string FifoQueueUrl { get; set; } = string.Empty;
 }
 
 public record WeatherForecast(Guid Id, string City, WeatherDetails Details);

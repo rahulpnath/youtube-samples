@@ -2,5 +2,6 @@ namespace WeatherForecastProcessor.Console;
 
 public class SqsSettings
 {
-    public string QueueUrl { get; set; } = string.Empty;
+    public string StandardQueueUrl { get; set; } = string.Empty;
+    public string FifoQueueUrl { get; set; } = string.Empty;
 }
