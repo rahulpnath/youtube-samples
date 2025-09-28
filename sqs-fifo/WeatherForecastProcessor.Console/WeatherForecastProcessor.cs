@@ -1,6 +1,8 @@
 using Amazon.SQS;
 using Amazon.SQS.Model;
 using Microsoft.Extensions.Options;
+using System.Text.Json;
+using WeatherForecastProcessor.Console.Models;
 
 namespace WeatherForecastProcessor.Console;
 
@@ -26,6 +28,20 @@ public class StandardQueueProcessor(IAmazonSQS sqsClient, IOptions<SqsSettings> 
             foreach (var message in response.Messages ?? Enumerable.Empty<Message>())
             {
                 System.Console.WriteLine($"[Standard Queue] New message received: {message.Body}");
+                
+                try
+                {
+                    var queueMessage = JsonSerializer.Deserialize<QueueMessage>(message.Body);
+                    if (queueMessage != null)
+                    {
+                        System.Console.WriteLine($"[Standard Queue] LoopNumber: {queueMessage.LoopNumber}, Message: {queueMessage.Message}");
+                    }
+                }
+                catch (JsonException ex)
+                {
+                    System.Console.WriteLine($"[Standard Queue] Failed to deserialize message: {ex.Message}");
+                }
+                
                 await sqsClient.DeleteMessageAsync(_settings.StandardQueueUrl, message.ReceiptHandle, cancellationToken);
             }
 
@@ -44,23 +60,51 @@ public class FifoQueueProcessor(IAmazonSQS sqsClient, IOptions<SqsSettings> sett
 
         while (!cancellationToken.IsCancellationRequested)
         {
-            var request = new ReceiveMessageRequest()
+            try
             {
-                QueueUrl = _settings.FifoQueueUrl,
-                MaxNumberOfMessages = 2,
-                WaitTimeSeconds = 20
-            };
+                var request = new ReceiveMessageRequest()
+                {
+                    QueueUrl = _settings.FifoQueueUrl,
+                    MaxNumberOfMessages = 2,
+                    WaitTimeSeconds = 20
+                };
 
-            var response = await sqsClient.ReceiveMessageAsync(request, cancellationToken);
+                var response = await sqsClient.ReceiveMessageAsync(request, cancellationToken);
 
-            foreach (var message in response.Messages ?? Enumerable.Empty<Message>())
-            {
-                System.Console.WriteLine($"[FIFO Queue] New message received: {message.Body}");
-                await Task.Delay(TimeSpan.FromSeconds(2));
-                await sqsClient.DeleteMessageAsync(_settings.FifoQueueUrl, message.ReceiptHandle, cancellationToken);
+                foreach (var message in response.Messages ?? Enumerable.Empty<Message>())
+                {
+                    System.Console.WriteLine($"[FIFO Queue] New message received: {message.Body}");
+
+                    try
+                    {
+                        var queueMessage = JsonSerializer.Deserialize<QueueMessage>(message.Body);
+                        if (queueMessage != null)
+                        {
+                            System.Console.WriteLine($"[FIFO Queue] LoopNumber: {queueMessage.LoopNumber}, Message: {queueMessage.Message} - {DateTime.Now}");
+                            // SIMULATE EXCEPTION
+                            // if (queueMessage.LoopNumber % 2 == 0)
+                            // {
+                            //    await sqsClient.ChangeMessageVisibilityAsync(
+                            //        _settings.FifoQueueUrl, message.ReceiptHandle, 0, cancellationToken);
+                            //     throw new Exception("Error In processing message");
+                            // }
+                        }
+                    }
+                    catch (JsonException ex)
+                    {
+                        System.Console.WriteLine($"[FIFO Queue] Failed to deserialize message: {ex.Message}");
+                    }
+
+                  // await Task.Delay(TimeSpan.FromSeconds(2));
+                    await sqsClient.DeleteMessageAsync(_settings.FifoQueueUrl, message.ReceiptHandle, cancellationToken);
+                }
+
+                await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
             }
-
-            await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
+            catch (Exception ex)
+            {
+                System.Console.WriteLine(ex.Message);
+            }
         }
     }
 }

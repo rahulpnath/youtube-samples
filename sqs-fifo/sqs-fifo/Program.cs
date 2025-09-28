@@ -90,7 +90,7 @@ app.MapPost("/publish-batch-standard", async (IAmazonSQS sqsClient, IOptions<Sqs
 app.MapPost("/publish-batch-fifo", async (IAmazonSQS sqsClient, IOptions<SqsSettings> sqsOptions) =>
 {
     var fifoEntries = new List<SendMessageBatchRequestEntry>();
-    for (int i = 1; i <= 10; i++)
+    for (int i = 1; i <= 4; i++)
     {
         fifoEntries.Add(new SendMessageBatchRequestEntry
         {
