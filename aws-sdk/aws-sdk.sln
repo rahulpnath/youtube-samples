@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "aws-sdk-v3", "aws-sdk-v3\aws-sdk-v3.csproj", "{A676C6B4-4526-47C5-B806-5069EE9B6781}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "aws-sdk-v4", "aws-sdk-v4\aws-sdk-v4.csproj", "{22B43F9D-769E-48E1-98DE-11A5756E15ED}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A676C6B4-4526-47C5-B806-5069EE9B6781}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A676C6B4-4526-47C5-B806-5069EE9B6781}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A676C6B4-4526-47C5-B806-5069EE9B6781}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A676C6B4-4526-47C5-B806-5069EE9B6781}.Release|Any CPU.Build.0 = Release|Any CPU
+		{22B43F9D-769E-48E1-98DE-11A5756E15ED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{22B43F9D-769E-48E1-98DE-11A5756E15ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{22B43F9D-769E-48E1-98DE-11A5756E15ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{22B43F9D-769E-48E1-98DE-11A5756E15ED}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

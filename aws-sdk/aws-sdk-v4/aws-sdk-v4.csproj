@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <RootNamespace>aws_sdk_v4</RootNamespace>
+        
+        <EnableNETAnalyzers>true</EnableNETAnalyzers>
+        <AnalysisMode>AllEnabledByDefault</AnalysisMode>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="AWSSDK.DynamoDBv2" Version="4.0.6.5" />
+        <PackageReference Include="AWSSDK.Core" Version="4.0.0.31" />
+        <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="4.0.3.1" />
+        <PackageReference Include="AWSSDK.S3" Version="4.0.7.4" />
+        <PackageReference Include="AWSSDK.SQS" Version="4.0.1.5" />
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.9"/>
+    </ItemGroup>
+
+</Project>

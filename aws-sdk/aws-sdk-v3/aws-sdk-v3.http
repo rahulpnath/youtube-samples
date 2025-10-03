@@ -1,0 +1,21 @@
+@aws_sdk_v3_HostAddress = http://localhost:5255
+
+GET {{aws_sdk_v3_HostAddress}}/weatherforecast-documents?prefix=your-prefix
+Accept: application/json
+
+###
+
+GET {{aws_sdk_v3_HostAddress}}/weatherforecast-document?key=weather.json
+Accept: application/json
+
+###
+
+GET {{aws_sdk_v3_HostAddress}}/movie/by-year?year=2022
+Accept: application/json
+
+###
+
+GET {{aws_sdk_v3_HostAddress}}/orders/by-customer-id?customerId=CUSTOMER#CUST12345
+Accept: application/json
+
+###
