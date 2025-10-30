@@ -1,0 +1,133 @@
+{
+    "Comment": "A description of my state machine",
+    "StartAt": "Pass",
+    "States": {
+        "Pass": {
+            "Type": "Pass",
+            "Assign": {
+                "user": "{% $states.input.user %}"
+            },
+            "Next": "Wait"
+        },
+        "Wait": {
+            "Type": "Wait",
+            "Seconds": 5,
+            "Next": "Save UserDetails"
+        },
+        "Save UserDetails": {
+            "Type": "Task",
+            "Resource": "arn:aws:states:::dynamodb:putItem",
+            "Arguments": {
+                "TableName": "User",
+                "Item": {
+                    "PK": {
+                        "S": "{% $user.userId %}"
+                    },
+                    "SK": {
+                        "S": "PROFILE"
+                    },
+                    "userId": {
+                        "S": "{% $user.userId %}"
+                    },
+                    "email": {
+                        "S": "{% $user.email %}"
+                    },
+                    "name": {
+                        "S": "{% $user.name %}"
+                    },
+                    "signupDate": {
+                        "S": "{% $user.signupDate %}"
+                    },
+                    "source": {
+                        "S": "{% $user.source %}"
+                    },
+                    "metadata": {
+                        "M": {
+                            "referralCode": {
+                                "S": "{% $user.metadata.referralCode %}"
+                            },
+                            "country": {
+                                "S": "{% $user.metadata.country %}"
+                            }
+                        }
+                    }
+                }
+            },
+            "Next": "Choice"
+        },
+        "Choice": {
+            "Type": "Choice",
+            "Choices": [
+                {
+                    "Next": "Lambda Invoke",
+                    "Condition": "{% $exists($user.metadata.referralCode) and $length($user.metadata.referralCode) > 0 %}"
+                }
+            ],
+            "Default": "Pass (1)"
+        },
+        "Lambda Invoke": {
+            "Type": "Task",
+            "Resource": "arn:aws:states:::lambda:invoke",
+            "Output": "{% $states.result.Payload %}",
+            "Arguments": {
+                "FunctionName": "arn:aws:lambda:ap-southeast-2:189107071895:function:user-onboarding:$LATEST",
+                "Payload": {
+                    "userId": "{% $user.userId %}",
+                    "created": "{% $now() %}",
+                    "source": "{% $user.source %}",
+                    "retryCount": "{% $states.context.State.RetryCount %}"
+                }
+            },
+            "Retry": [
+                {
+                    "ErrorEquals": [
+                        "Lambda.ServiceException",
+                        "Lambda.AWSLambdaException",
+                        "Lambda.SdkClientException",
+                        "Lambda.TooManyRequestsException",
+                        "LambdaServiceException"
+                    ],
+                    "IntervalSeconds": 1,
+                    "MaxAttempts": 3,
+                    "BackoffRate": 2,
+                    "JitterStrategy": "FULL"
+                }
+            ],
+            "Next": "SQS SendMessage",
+            "Catch": [
+                {
+                    "ErrorEquals": [
+                        "InvalidUserDataException"
+                    ],
+                    "Comment": "Invalid user data",
+                    "Next": "Pass (2)"
+                }
+            ]
+        },
+        "Pass (2)": {
+            "Type": "Pass",
+            "Comment": "cannot process this record",
+            "Next": "SQS SendMessage"
+        },
+        "Pass (1)": {
+            "Type": "Pass",
+            "Output": "No Action",
+            "Next": "SQS SendMessage"
+        },
+        "SQS SendMessage": {
+            "Type": "Task",
+            "Resource": "arn:aws:states:::sqs:sendMessage",
+            "Arguments": {
+                "QueueUrl": "https://sqs.ap-southeast-2.amazonaws.com/189107071895/user-onboarding",
+                "MessageBody": {
+                    "type": "UserOnboarded",
+                    "userId": "{% $user.userId %}",
+                    "signupDate": "{% $user.signupDate %}",
+                    "createdDate": "{% $now() %}"
+                }
+            },
+            "End": true
+        }
+    },
+    "QueryLanguage": "JSONata"
+}
