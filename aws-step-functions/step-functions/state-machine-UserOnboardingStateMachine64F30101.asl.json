@@ -1,0 +1,162 @@
+{
+  "StartAt": "Pass",
+  "States": {
+    "Pass": {
+      "Type": "Pass",
+      "Comment": "Extract user from input",
+      "ResultPath": "$",
+      "Parameters": {
+        "user.$": "$.user"
+      },
+      "Next": "Wait"
+    },
+    "Wait": {
+      "Type": "Wait",
+      "Seconds": 5,
+      "Next": "Save UserDetails"
+    },
+    "Save UserDetails": {
+      "Next": "Choice",
+      "Type": "Task",
+      "ResultPath": null,
+      "Resource": "arn::states:::aws-sdk:dynamodb:putItem",
+      "Parameters": {
+        "TableName": "User",
+        "Item": {
+          "PK": {
+            "S.$": "$.user.userId"
+          },
+          "SK": {
+            "S": "PROFILE"
+          },
+          "userId": {
+            "S.$": "$.user.userId"
+          },
+          "email": {
+            "S.$": "$.user.email"
+          },
+          "name": {
+            "S.$": "$.user.name"
+          },
+          "signupDate": {
+            "S.$": "$.user.signupDate"
+          },
+          "source": {
+            "S.$": "$.user.source"
+          },
+          "metadata": {
+            "M": {
+              "referralCode": {
+                "S.$": "$.user.metadata.referralCode"
+              },
+              "country": {
+                "S.$": "$.user.metadata.country"
+              }
+            }
+          }
+        }
+      }
+    },
+    "Choice": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "And": [
+            {
+              "Variable": "$.user.metadata.referralCode",
+              "IsPresent": true
+            },
+            {
+              "Variable": "$.user.metadata.referralCode",
+              "IsNull": false
+            },
+            {
+              "Not": {
+                "Variable": "$.user.metadata.referralCode",
+                "StringEquals": ""
+              }
+            }
+          ],
+          "Next": "Lambda Invoke"
+        }
+      ],
+      "Default": "Pass (1)"
+    },
+    "Pass (1)": {
+      "Type": "Pass",
+      "Result": "No Action",
+      "ResultPath": "$.result",
+      "Next": "SQS SendMessage"
+    },
+    "SQS SendMessage": {
+      "End": true,
+      "Type": "Task",
+      "Resource": "arn::states:::sqs:sendMessage",
+      "Parameters": {
+        "QueueUrl": "https://sqs.ap-southeast-2./189107071895/user-onboarding",
+        "MessageBody": {
+          "type": "UserOnboarded",
+          "userId.$": "$.user.userId",
+          "signupDate.$": "$.user.signupDate",
+          "createdDate.$": "$$.State.EnteredTime"
+        }
+      }
+    },
+    "Lambda Invoke": {
+      "Next": "SQS SendMessage",
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ClientExecutionTimeoutException",
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException",
+            "Lambda.SdkClientException"
+          ],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 6,
+          "BackoffRate": 2
+        },
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException",
+            "Lambda.SdkClientException",
+            "Lambda.TooManyRequestsException",
+            "LambdaServiceException"
+          ],
+          "IntervalSeconds": 1,
+          "MaxAttempts": 3,
+          "BackoffRate": 2,
+          "JitterStrategy": "FULL"
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "InvalidUserDataException"
+          ],
+          "ResultPath": "$.error",
+          "Next": "Pass (2)"
+        }
+      ],
+      "Type": "Task",
+      "OutputPath": "$.Payload",
+      "Resource": "arn::states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "arn:aws:lambda:ap-southeast-2:189107071895:function:user-onboarding:$LATEST",
+        "Payload": {
+          "userId.$": "$.user.userId",
+          "created.$": "$$.State.EnteredTime",
+          "source.$": "$.user.source",
+          "retryCount.$": "$$.State.RetryCount"
+        }
+      }
+    },
+    "Pass (2)": {
+      "Type": "Pass",
+      "Comment": "cannot process this record",
+      "Next": "SQS SendMessage"
+    }
+  },
+  "TimeoutSeconds": 300
+}

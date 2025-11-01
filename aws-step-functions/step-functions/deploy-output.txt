@@ -1,0 +1,25 @@
+
+✨  Synthesis time: 5.58s
+
+StepFunctionStack: start: Building StepFunctionStack Template
+StepFunctionStack: success: Built StepFunctionStack Template
+StepFunctionStack: start: Publishing StepFunctionStack Template (current_account-current_region-a9b4a17f)
+StepFunctionStack: success: Published StepFunctionStack Template (current_account-current_region-a9b4a17f)
+StepFunctionStack: deploying... [1/1]
+StepFunctionStack: creating CloudFormation changeset...
+StepFunctionStack | 0/5 | 5:40:09 pm | REVIEW_IN_PROGRESS   | AWS::CloudFormation::Stack       | StepFunctionStack User Initiated
+StepFunctionStack | 0/5 | 5:40:15 pm | CREATE_IN_PROGRESS   | AWS::CloudFormation::Stack       | StepFunctionStack User Initiated
+StepFunctionStack | 0/5 | 5:40:17 pm | CREATE_IN_PROGRESS   | AWS::IAM::Role                   | UserOnboardingStateMachine/Role (UserOnboardingStateMachineRole7999D95F) 
+StepFunctionStack | 0/5 | 5:40:17 pm | CREATE_IN_PROGRESS   | AWS::CDK::Metadata               | CDKMetadata/Default (CDKMetadata) 
+StepFunctionStack | 0/5 | 5:40:18 pm | CREATE_IN_PROGRESS   | AWS::IAM::Role                   | UserOnboardingStateMachine/Role (UserOnboardingStateMachineRole7999D95F) Resource creation Initiated
+StepFunctionStack | 0/5 | 5:40:18 pm | CREATE_IN_PROGRESS   | AWS::CDK::Metadata               | CDKMetadata/Default (CDKMetadata) Resource creation Initiated
+StepFunctionStack | 1/5 | 5:40:18 pm | CREATE_COMPLETE      | AWS::CDK::Metadata               | CDKMetadata/Default (CDKMetadata) 
+StepFunctionStack | 2/5 | 5:40:35 pm | CREATE_COMPLETE      | AWS::IAM::Role                   | UserOnboardingStateMachine/Role (UserOnboardingStateMachineRole7999D95F) 
+StepFunctionStack | 2/5 | 5:40:35 pm | CREATE_IN_PROGRESS   | AWS::IAM::Policy                 | UserOnboardingStateMachine/Role/DefaultPolicy (UserOnboardingStateMachineRoleDefaultPolicy7D3AD3EC) 
+StepFunctionStack | 2/5 | 5:40:37 pm | CREATE_IN_PROGRESS   | AWS::IAM::Policy                 | UserOnboardingStateMachine/Role/DefaultPolicy (UserOnboardingStateMachineRoleDefaultPolicy7D3AD3EC) Resource creation Initiated
+StepFunctionStack | 3/5 | 5:40:53 pm | CREATE_COMPLETE      | AWS::IAM::Policy                 | UserOnboardingStateMachine/Role/DefaultPolicy (UserOnboardingStateMachineRoleDefaultPolicy7D3AD3EC) 
+StepFunctionStack | 3/5 | 5:40:54 pm | CREATE_IN_PROGRESS   | AWS::StepFunctions::StateMachine | UserOnboardingStateMachine (UserOnboardingStateMachine64F30101) 
+StepFunctionStack | 3/5 | 5:40:55 pm | CREATE_FAILED        | AWS::StepFunctions::StateMachine | UserOnboardingStateMachine (UserOnboardingStateMachine64F30101) Resource handler returned message: "Invalid State Machine Definition: 'SCHEMA_VALIDATION_FAILED: Field 'End' is not supported at /States/Choice, MISSING_TRANSITION_TARGET: Missing 'Next' target: Lambda Invoke at /States/Choice/Choices[0]/Next, MISSING_TRANSITION_TARGET: Missing 'Next' target: Pass (1) at /States/Choice/Default' (Service: Sfn, Status Code: 400, Request ID: 9c0269f5-3b78-4990-8808-9ec1aeb91ed1) (SDK Attempt Count: 1)" (RequestToken: 450dca4e-437b-c664-54b3-aeaa9b156d65, HandlerErrorCode: InvalidRequest)
+StepFunctionStack | 3/5 | 5:40:55 pm | ROLLBACK_IN_PROGRESS | AWS::CloudFormation::Stack       | StepFunctionStack The following resource(s) failed to create: [UserOnboardingStateMachine64F30101]. Rollback requested by user.
+StepFunctionStack | 3/5 | 5:40:57 pm | DELETE_IN_PROGRESS   | AWS::CDK::Metadata               | CDKMetadata/Default (CDKMetadata) 
+StepFunctionStack | 2/5 | 5:40:58 pm | DELETE_COMPLETE      | AWS::CDK::Metadata               | CDKMetadata/Default (CDKMetadata) 

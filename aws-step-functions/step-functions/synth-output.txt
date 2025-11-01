@@ -1,0 +1,76 @@
+You currently have 18 unconfigured feature flags that may require attention to keep your application up-to-date. Run 'cdk flags' to learn more.
+Resources:
+  UserOnboardingStateMachineRole7999D95F:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: states.amazonaws.com
+        Version: "2012-10-17"
+    Metadata:
+      aws:cdk:path: UserOnboardingStack/UserOnboardingStateMachine/Role/Resource
+  UserOnboardingStateMachineRoleDefaultPolicy7D3AD3EC:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Action: dynamodb:putItem
+            Effect: Allow
+            Resource:
+              Fn::Join:
+                - ""
+                - - "arn:aws:dynamodb:ap-southeast-2:"
+                  - Ref: AWS::AccountId
+                  - :table/User
+          - Action: sqs:sendMessage
+            Effect: Allow
+            Resource: arn:aws:sqs:ap-southeast-2:189107071895:user-onboarding
+          - Action: lambda:invoke
+            Effect: Allow
+            Resource: arn:aws:lambda:ap-southeast-2:189107071895:function:user-onboarding:$LATEST
+        Version: "2012-10-17"
+      PolicyName: UserOnboardingStateMachineRoleDefaultPolicy7D3AD3EC
+      Roles:
+        - Ref: UserOnboardingStateMachineRole7999D95F
+    Metadata:
+      aws:cdk:path: UserOnboardingStack/UserOnboardingStateMachine/Role/DefaultPolicy/Resource
+  UserOnboardingStateMachine64F30101:
+    Type: AWS::StepFunctions::StateMachine
+    Properties:
+      DefinitionString:
+        Fn::Join:
+          - ""
+          - - '{"StartAt":"Pass","States":{"Pass":{"Type":"Pass","Comment":"Extract user from input","Next":"Wait","Assign":{"user":"{% $states.input.user %}"}},"Wait":{"Type":"Wait","Seconds":5,"Next":"Save UserDetails"},"Save UserDetails":{"Next":"Choice","Type":"Task","Arguments":{"TableName":"User","Item":{"PK":{"S":"{% $user.userId %}"},"SK":{"S":"PROFILE"},"userId":{"S":"{% $user.userId %}"},"email":{"S":"{% $user.email %}"},"name":{"S":"{% $user.name %}"},"signupDate":{"S":"{% $user.signupDate %}"},"source":{"S":"{% $user.source %}"},"metadata":{"M":{"referralCode":{"S":"{% $user.metadata.referralCode %}"},"country":{"S":"{% $user.metadata.country %}"}}}}},"Resource":"arn:'
+            - Ref: AWS::Partition
+            - ':states:::aws-sdk:dynamodb:putItem"},"Choice":{"Type":"Choice","Choices":[{"Condition":"{% $exists($user.metadata.referralCode) and $length($user.metadata.referralCode) > 0 %}","Next":"Lambda Invoke","Comment":"User has referral code"}],"Default":"Pass (1)"},"Pass (1)":{"Type":"Pass","Comment":"No Action","Result":"No Action","Next":"SQS SendMessage"},"SQS SendMessage":{"End":true,"Type":"Task","Arguments":{"QueueUrl":"https://sqs.ap-southeast-2.amazonaws.com/189107071895/user-onboarding","MessageBody":{"type":"UserOnboarded","userId":"{% $user.userId %}","signupDate":"{% $user.signupDate %}","createdDate":"{% $now() %}"}},"Resource":"arn:'
+            - Ref: AWS::Partition
+            - ':states:::aws-sdk:sqs:sendMessage"},"Lambda Invoke":{"Next":"SQS SendMessage","Retry":[{"ErrorEquals":["Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException","Lambda.TooManyRequestsException","LambdaServiceException"],"IntervalSeconds":1,"MaxAttempts":3,"BackoffRate":2,"JitterStrategy":"FULL"}],"Catch":[{"ErrorEquals":["InvalidUserDataException"],"ResultPath":"$.error","Next":"Pass (2)"}],"Type":"Task","Arguments":{"FunctionName":"arn:aws:lambda:ap-southeast-2:189107071895:function:user-onboarding:$LATEST","Payload":{"userId":"{% $user.userId %}","created":"{% $now() %}","source":"{% $user.source %}","retryCount":"{% $states.context.State.RetryCount %}"}},"Resource":"arn:'
+            - Ref: AWS::Partition
+            - :states:::aws-sdk:lambda:invoke"},"Pass (2)":{"Type":"Pass","Comment":"cannot process this record","Next":"SQS SendMessage"}},"Comment":"User onboarding workflow","QueryLanguage":"JSONata"}
+      RoleArn:
+        Fn::GetAtt:
+          - UserOnboardingStateMachineRole7999D95F
+          - Arn
+      StateMachineType: STANDARD
+    DependsOn:
+      - UserOnboardingStateMachineRoleDefaultPolicy7D3AD3EC
+      - UserOnboardingStateMachineRole7999D95F
+    UpdateReplacePolicy: Delete
+    DeletionPolicy: Delete
+    Metadata:
+      aws:cdk:path: UserOnboardingStack/UserOnboardingStateMachine/Resource
+  CDKMetadata:
+    Type: AWS::CDK::Metadata
+    Properties:
+      Analytics: v2:deflate64:H4sIAAAAAAAA/52RT0/jMBDFPws+Itf9sxdUaQ+h3ZVAu6U0ERyqCk3tKfXWsUPGpoqsfPdVklJAFQghHyy9N37zm/FIjAYXYnAGe+pJtesZvRYx9SB3HPb0EFVlIXdqLTJYG7wEwuWKG8jXCsTvYKXXzh5UeiJxGzC8VJHHYnMoIRHnQMTvQXs+2TotkacePP4FudUWl5FJl+doPRuzc8aZwo22uk13qjqITwHL6g/YxwCPyMbsOr2ZgQfGGb3JyqqiMdMsmU2TxZTVPDJQKnMLZ3DujJYVGy9jvfqGseKTjX0LXr8f88ED7UhMwJhkTymWz82kGnIRm6xlZEAUclSXFRtHVpTaSl2ASaR04Th8V9M8SNrYVq6PVPOXVyfM3oPcXlmj7Ss2O2dfMD/P/dhtF9KQ8k5uEo/NugWeMJzKSrU7bf6f3rX9qtxidAR1zRdILpQSDw2mzs/Q9y/EQIyGfTH7lU1ciUlR9O6wJO3sz+cfYtgfikFzzv6R1r0yWK9zFIvu/g8YGFNEJwMAAA==
+    Metadata:
+      aws:cdk:path: UserOnboardingStack/CDKMetadata/Default
+Parameters:
+  BootstrapVersion:
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /cdk-bootstrap/hnb659fds/version
+    Description: Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]
+
