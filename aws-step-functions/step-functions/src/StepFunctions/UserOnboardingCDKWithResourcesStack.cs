@@ -18,7 +18,7 @@ public class UserOnboardingCDKWithResourcesStack : Stack
     // Create DynamoDB Table
     var userTable = new Table(this, "UserTable", new TableProps
     {
-      TableName = "User-OnboardingWorkflow",
+      TableName = "CDK-User-OnboardingWorkflow",
       PartitionKey = new Attribute
       {
         Name = "PK",
@@ -36,7 +36,7 @@ public class UserOnboardingCDKWithResourcesStack : Stack
     // Create SQS Queue
     var onboardingQueue = new Queue(this, "OnboardingQueue", new QueueProps
     {
-      QueueName = "user-onboarding-workflow-queue",
+      QueueName = "CDK-user-onboarding-workflow-queue",
       VisibilityTimeout = Duration.Seconds(300),
       RetentionPeriod = Duration.Days(14)
     });
@@ -45,7 +45,7 @@ public class UserOnboardingCDKWithResourcesStack : Stack
     // CDK will automatically build the .NET project during deployment
     var lambdaLogGroup = new Amazon.CDK.AWS.Logs.LogGroup(this, "OnboardingFunctionLogGroup", new LogGroupProps
     {
-      LogGroupName = "/aws/lambda/user-onboarding-workflow",
+      LogGroupName = "/aws/lambda/CDK-user-onboarding-workflow",
       Retention = RetentionDays.ONE_WEEK,
       RemovalPolicy = RemovalPolicy.DESTROY
     });
@@ -71,7 +71,7 @@ public class UserOnboardingCDKWithResourcesStack : Stack
           }
         }
       }),
-      FunctionName = "user-onboarding-workflow",
+      FunctionName = "CDK-user-onboarding-workflow",
       Timeout = Duration.Seconds(30),
       MemorySize = 512,
       LogGroup = lambdaLogGroup,
@@ -259,7 +259,7 @@ public class UserOnboardingCDKWithResourcesStack : Stack
       StateMachineType = StateMachineType.STANDARD,
       QueryLanguage = QueryLanguage.JSONATA,
       Comment = "User onboarding workflow with all resources",
-      StateMachineName = "UserOnboardingCDKWithResource",
+      StateMachineName = "CDK-UserOnboardingWithResources",
       Role = stateMachineRole
     });
 

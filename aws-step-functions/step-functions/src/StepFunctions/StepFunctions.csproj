@@ -21,6 +21,9 @@
     <Content Include="user-onboarding.asl.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+     <Content Include="user-onboarding-cdk.asl.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>

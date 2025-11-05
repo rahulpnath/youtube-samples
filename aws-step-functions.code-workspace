@@ -1,0 +1,11 @@
+{
+	"folders": [
+		{
+			"path": "aws-step-functions"
+		},
+		{
+			"path": ".github"
+		}
+	],
+	"settings": {}
+}

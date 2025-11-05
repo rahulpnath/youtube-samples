@@ -1,0 +1,97 @@
+name: AWS Step Functions CDK Stack
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'aws-step-functions/**'
+      - '.github/workflows/aws-step-functions-cdk.yml'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - prod
+
+env:
+  AWS_REGION: ap-southeast-2
+  DOTNET_VERSION: '8.0.x'
+  NODE_VERSION: '20.x'
+  STACK_NAME: UserOnboardingCDKWithResourcesStack
+
+jobs:
+  deploy:
+    name: Deploy CDK Stack
+    runs-on: ubuntu-latest
+
+    # Optionally add environment protection rules
+    # environment:
+    #   name: ${{ github.event.inputs.environment || 'dev' }}
+
+    permissions:
+      contents: read    # Required to checkout code
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install AWS CDK
+        run: npm install -g aws-cdk
+
+      - name: Configure AWS credentials (OIDC)
+        if: vars.AWS_ROLE_ARN != ''
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+          role-session-name: GitHubActions-CDK-Deploy
+
+      - name: Configure AWS credentials (Access Keys)
+        if: vars.AWS_ROLE_ARN == ''
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Restore .NET dependencies (CDK project)
+        working-directory: aws-step-functions/step-functions/src/StepFunctions
+        run: dotnet restore
+
+      - name: Build CDK project
+        working-directory: aws-step-functions/step-functions/src/StepFunctions
+        run: dotnet build --no-restore --configuration Release
+
+      - name: CDK Deploy
+        if: github.event_name != 'pull_request'
+        working-directory: aws-step-functions/step-functions
+        run: |
+          cdk deploy ${{ env.STACK_NAME }} \
+            --require-approval never \
+            --verbose
+
+      - name: Get Stack Outputs
+        if: github.event_name != 'pull_request'
+        working-directory: aws-step-functions/step-functions
+        run: |
+          echo "## Stack Outputs" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          aws cloudformation describe-stacks \
+            --stack-name ${{ env.STACK_NAME }} \
+            --region ${{ env.AWS_REGION }} \
+            --query 'Stacks[0].Outputs[*].[OutputKey,OutputValue,Description]' \
+            --output table >> $GITHUB_STEP_SUMMARY || echo "Could not retrieve stack outputs" >> $GITHUB_STEP_SUMMARY

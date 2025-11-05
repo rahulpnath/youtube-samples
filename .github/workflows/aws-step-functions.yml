@@ -1,0 +1,49 @@
+name: AWS Step Functions ASL Stack
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - "aws-step-functions/**"
+  workflow_dispatch:
+
+jobs:
+  aws-step-functions:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-southeast-2
+
+      - name: Deploy Step Functions State Machine
+        run: |
+          echo "Deploying Step Functions State Machine from ASL definition..."
+
+          # Check if state machine exists
+          STATE_MACHINE_NAME="UserOnboardingASL"
+          ROLE_ARN="${{ secrets.STEP_FUNCTIONS_ROLE_ARN }}"
+
+          if aws stepfunctions describe-state-machine --state-machine-arn "arn:aws:states:ap-southeast-2:189107071895:stateMachine:${STATE_MACHINE_NAME}" 2>/dev/null; then
+            echo "State machine exists. Updating definition..."
+            aws stepfunctions update-state-machine \
+              --state-machine-arn "arn:aws:states:ap-southeast-2:189107071895:stateMachine:${STATE_MACHINE_NAME}" \
+              --definition file://aws-step-functions/user-onboarding.asl.json
+          else
+            echo "State machine does not exist. Creating new state machine..."
+            aws stepfunctions create-state-machine \
+              --name "${STATE_MACHINE_NAME}" \
+              --definition file://aws-step-functions/user-onboarding.asl.json \
+              --role-arn "${ROLE_ARN}" \
+              --type STANDARD
+          fi
+
+          echo "Deployment completed successfully!"

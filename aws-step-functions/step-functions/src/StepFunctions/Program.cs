@@ -42,6 +42,14 @@ namespace StepFunctions
                 }
             });
 
+            new UserOnboardingUsingASLWithResourcesStack(app, "UserOnboardingUsingASLWithResourcesStack", new StackProps
+            {
+                Env = new Amazon.CDK.Environment
+                {
+                    Region = "ap-southeast-2",
+                }
+            });
+
             app.Synth();
         }
     }
