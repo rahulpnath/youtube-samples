@@ -7,6 +7,11 @@
             "Assign": {
                 "user": "{% $states.input.user %}"
             },
+            "Next": "Wait"
+        },
+        "Wait": {
+            "Type": "Wait",
+            "Seconds": 5,
             "Next": "Save UserDetails"
         },
         "Save UserDetails": {
